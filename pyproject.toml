@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "sibling-trip"
+version = "0.1.0"
+description = ""
+authors = ["hkim <hyeon000125@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+fastapi = ">=0.103.1,<0.104.0"
+uvicorn = {version = "^0.23.2", extras = ["standard"]}
+
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.2"
+pytest-asyncio = "^0.21.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
