@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager, AsyncExitStack
 from fastapi import FastAPI
 
 from api_python.app.common.client.resources import async_resource_list
+from api_python.app.stay.stay_router import stay_router
 
 
 # noinspection PyShadowingNames,PyUnusedLocal
@@ -16,6 +17,8 @@ async def lifespan(app: FastAPI):
         yield
 
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(stay_router)
 
 
 @app.get("/actuator/health")
