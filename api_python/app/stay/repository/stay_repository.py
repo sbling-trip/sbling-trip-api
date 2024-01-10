@@ -6,7 +6,7 @@ from api_python.app.common.client.postgres.postgres_client import postgres_clien
 from api_python.app.stay.model.stay_info import StayInfoModel, StayInfoOrm
 
 
-def stay_orm_to_pydantic_model(result: ChunkedIteratorResult[Tuple[StayInfoOrm]]) -> list[StayInfoModel]:
+def stay_orm_to_pydantic_model(result: ChunkedIteratorResult[Tuple[StayInfoOrm]]    ) -> list[StayInfoModel]:
     return [StayInfoModel.model_validate(orm) for orm in result.scalars().all()]
 
 

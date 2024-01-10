@@ -1,6 +1,6 @@
 from authlib.integrations.starlette_client import OAuth
 
-from api_python.resources.credentials import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+from api_python.resources.credentials import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SECRET_KEY
 
 oauth = OAuth()
 oauth.register(
@@ -10,5 +10,6 @@ oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
         'scope': 'openid email profile'
-    }
+    },
+    authorize_state=SECRET_KEY
 )
