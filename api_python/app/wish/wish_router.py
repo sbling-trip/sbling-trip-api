@@ -1,8 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 
 from api_python.app.common.api_response import ApiResponse
+from api_python.app.users.model.user_model import UserModel
+from api_python.app.users.service.user_service import get_current_user
 
 wish_router = APIRouter(
     prefix="/wish",
@@ -17,7 +19,7 @@ wish_router = APIRouter(
 )
 async def add_stay_wish(
         stay_seq: Annotated[int, Query(alias="staySeq", description="찜 추가할 숙소 seq")],
-        user_seq: Annotated[int, Query(description="찜 추가할 유저 seq")]
+        user_seq: Annotated[int, Depends(get_current_user)]
 ) -> ApiResponse[str]:
     return ApiResponse.success("Success")
 
@@ -30,7 +32,7 @@ async def add_stay_wish(
 )
 async def remove_stay_wish(
         stay_seq: Annotated[int, Query(description="찜 삭제할 숙소 seq")],
-        user_seq: Annotated[int, Query(description="찜 삭제할 유저 seq")]
+        user_seq: Annotated[int, Depends(get_current_user)]
 ) -> ApiResponse[str]:
     return ApiResponse.success("Success")
 

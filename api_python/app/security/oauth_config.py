@@ -1,4 +1,5 @@
 from authlib.integrations.starlette_client import OAuth
+from fastapi.security import OAuth2PasswordBearer
 
 from api_python.resources.credentials import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SECRET_KEY
 
@@ -13,3 +14,5 @@ oauth.register(
     },
     authorize_state=SECRET_KEY
 )
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

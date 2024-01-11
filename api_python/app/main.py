@@ -12,8 +12,6 @@ from api_python.app.stay.stay_router import stay_router
 from api_python.app.users.user_router import user_router
 from api_python.app.wish.wish_router import wish_router
 
-from api_python.resources.credentials import SECRET_KEY
-
 
 # noinspection PyShadowingNames,PyUnusedLocal
 @asynccontextmanager
@@ -35,7 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+app.add_middleware(SessionMiddleware, secret_key="SECRET_KEY")
 
 app.include_router(stay_router)
 app.include_router(wish_router)
