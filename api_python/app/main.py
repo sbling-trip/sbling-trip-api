@@ -9,6 +9,7 @@ from api_python.app.common.client.resources import async_resource_list
 from api_python.app.security.cors import allow_origins
 from api_python.app.security.auth_router import auth_router
 from api_python.app.stay.stay_router import stay_router
+from api_python.app.users.user_router import user_router
 from api_python.app.wish.wish_router import wish_router
 
 from api_python.resources.credentials import SECRET_KEY
@@ -39,6 +40,7 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 app.include_router(stay_router)
 app.include_router(wish_router)
 app.include_router(auth_router)
+app.include_router(user_router)
 
 
 @app.get("/actuator/health")

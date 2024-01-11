@@ -6,11 +6,12 @@ from starlette.requests import Request
 from api_python.app.common.configuration import config
 from api_python.app.security.oauth_config import oauth
 
-import jwt
+from api_python.app.users.model.user_model import  UserOrm
+from api_python.app.users.repository.user_repository import find_by_external_id, insert_user_from_orm
+from api_python.resources.credentials import SECRET_KEY, ALGORITHM
 
-from api_python.app.users.model.user_model import UserModel, UserOrm
-from api_python.app.users.repository.user_repository import find_by_external_id, insert_user, insert_user_from_orm
-from api_python.resources.credentials import SECRET_KEY
+from jose import jwt
+
 
 auth_router = APIRouter(
     prefix="/oauth/login"
@@ -32,6 +33,7 @@ async def auth_via_google(request: Request):
     user = token['userinfo']
     user_model = await find_by_external_id(user['sub'])
     if user_model:
+        # TODO: expired_at 업데이트
         pass
     else:
         new_user = UserOrm(
@@ -61,5 +63,5 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.utcnow() + timedelta(hours=12)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(data, SECRET_KEY, algorithm="HS256")
+    encoded_jwt = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
