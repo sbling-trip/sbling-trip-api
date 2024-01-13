@@ -20,7 +20,12 @@ auth_router = APIRouter(
 # TODO: oauth 제공사들에 맞게 redirect를 요청, id, password를 입력받아 로그인을 진행 API 추가.
 
 
-@auth_router.get('/{provider}')
+@auth_router.get(
+    "/{provider}",
+    summary="oauth 로그인",
+    description="oauth 제공사들에 맞게 redirect를 요청합니다. provider현재 google만 제공됩니다.",
+    tags=["oauth"],
+)
 async def login_by_oauth(request: Request, provider: str):
     base_url = config["fastapi"]["base_url"]
     redirect_uri = f'{base_url}/oauth/login/{provider}/callback'
@@ -28,7 +33,12 @@ async def login_by_oauth(request: Request, provider: str):
     return await oauth.create_client(provider).authorize_redirect(request, redirect_uri)
 
 
-@auth_router.get("/google/callback")
+@auth_router.get(
+    "/google/callback",
+    summary="oauth 로그인 콜백",
+    description="oauth 제공사들에 맞게 redirect를 요청합니다. response에 access_token을 담아 반환합니다.",
+    tags=["oauth"],
+)
 async def auth_via_google(request: Request) -> ApiResponse[Token]:
     token = await oauth.google.authorize_access_token(request)
 

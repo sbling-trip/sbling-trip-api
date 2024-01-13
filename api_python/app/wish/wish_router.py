@@ -14,8 +14,8 @@ wish_router = APIRouter(
 @wish_router.get(
     "/add",
     summary="숙소 찜 목록 추가",
+    description="아직 미구현 된 API 입니다.",
     tags=["숙소", "찜"],
-    description="아직 미구현 된 API 입니다."
 )
 async def add_stay_wish(
         stay_seq: Annotated[int, Query(alias="staySeq", description="찜 추가할 숙소 seq")],
@@ -27,8 +27,8 @@ async def add_stay_wish(
 @wish_router.get(
     "/remove",
     summary="숙소 찜 목록 삭제",
+    description="아직 미구현 된 API 입니다.",
     tags=["숙소", "찜"],
-    description="아직 미구현 된 API 입니다."
 )
 async def remove_stay_wish(
         stay_seq: Annotated[int, Query(description="찜 삭제할 숙소 seq")],
@@ -38,9 +38,10 @@ async def remove_stay_wish(
 
 
 @wish_router.get(
-    "list",
+    "/list",
     summary="숙소 찜 목록 조회",
-    description="아직 미구현 된 API 입니다."
+    description="아직 미구현 된 API 입니다.",
+    tags=["숙소", "찜"],
 )
 async def get_stay_wish_list() -> ApiResponse[str]:
     return ApiResponse.success("Success")
