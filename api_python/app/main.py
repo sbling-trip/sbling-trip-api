@@ -12,6 +12,14 @@ from api_python.app.stay.stay_router import stay_router
 from api_python.app.users.user_router import user_router
 from api_python.app.wish.wish_router import wish_router
 
+import random
+import string
+
+
+def get_random_string(length=10):
+    result_str = ''.join(random.choice(string.ascii_letters) for i in range(length))
+    return result_str
+
 
 # noinspection PyShadowingNames,PyUnusedLocal
 @asynccontextmanager
@@ -33,7 +41,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SessionMiddleware, secret_key="SECRET_KEY")
+
+app.add_middleware(SessionMiddleware, secret_key=get_random_string())
 
 app.include_router(stay_router)
 app.include_router(wish_router)

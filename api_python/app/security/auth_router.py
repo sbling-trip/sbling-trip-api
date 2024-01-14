@@ -2,10 +2,9 @@ from datetime import timedelta, datetime
 
 from fastapi import APIRouter
 from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
-from api_python.app.common.api_response import ApiResponse
 from api_python.app.common.configuration import config
-from api_python.app.security.model.token import Token
 from api_python.app.security.oauth_config import oauth
 from api_python.app.security.service.security_service import create_access_token
 
@@ -21,25 +20,28 @@ auth_router = APIRouter(
 
 
 @auth_router.get(
-    "/{provider}",
+    "/google",
     summary="oauth 로그인",
-    description="oauth 제공사들에 맞게 redirect를 요청합니다. provider현재 google만 제공됩니다.",
+    description="google 로그인",
     tags=["oauth"],
 )
-async def login_by_oauth(request: Request, provider: str):
-    base_url = config["fastapi"]["base_url"]
-    redirect_uri = f'{base_url}/oauth/login/{provider}/callback'
+async def login_via_google(request: Request):
+    # # base_url = config["fastapi"]["base_url"]
+    # # base_url = request.base_url
+    # google = oauth.create_client('google')
+    redirect_uri = request.url_for('auth_via_google')
+    print(f"redirect_uri: {redirect_uri}")
     # callback 주소를 담아 oauth 제공사들에 맞게 redirect를 요청
-    return await oauth.create_client(provider).authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
 @auth_router.get(
     "/google/callback",
     summary="oauth 로그인 콜백",
-    description="oauth 제공사들에 맞게 redirect를 요청합니다. response에 access_token을 담아 반환합니다.",
+    description="google 로그인 콜백 처리 후 쿠키에 토큰 저장",
     tags=["oauth"],
 )
-async def auth_via_google(request: Request) -> ApiResponse[Token]:
+async def auth_via_google(request: Request) -> RedirectResponse:
     token = await oauth.google.authorize_access_token(request)
 
     user = token['userinfo']
@@ -68,4 +70,14 @@ async def auth_via_google(request: Request) -> ApiResponse[Token]:
         data={"sub": user["sub"], "exp": expired_at}
     )
 
-    return ApiResponse.success(Token(access_token=access_token))
+    redirect_respnse = RedirectResponse(
+        url=config["fastapi"]["redirect_url"],
+    )
+    redirect_respnse.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        max_age=60 * 60 * 12,
+        expires=60 * 60 * 12,
+    )
+    return redirect_respnse

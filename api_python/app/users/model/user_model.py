@@ -41,3 +41,5 @@ class UserModel(BaseModel):
     created_at: datetime
     logged_in_at: datetime
 
+
+

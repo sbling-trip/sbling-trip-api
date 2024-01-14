@@ -2,6 +2,8 @@ from typing import Annotated
 
 from fastapi import Depends
 from jose import jwt, JWTError
+from starlette.exceptions import HTTPException
+from starlette.requests import Request
 
 from api_python.app.common.exceptions import credentials_exception
 from api_python.app.security.oauth_config import oauth2_scheme
@@ -20,3 +22,10 @@ def decode_token(token: Annotated[str, Depends(oauth2_scheme)]):
         raise credentials_exception
 
     return payload
+
+
+async def get_token_from_cookie(request: Request):
+    access_token = request.cookies.get('access_token')
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Access token missing in cookies")
+    return access_token
