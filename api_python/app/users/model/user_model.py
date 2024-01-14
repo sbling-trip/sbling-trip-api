@@ -20,7 +20,7 @@ class UserOrm(Base):
     logo_url = Column(VARCHAR(255), nullable=True)
     expired_at = Column(TIMESTAMP, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False)
-    logged_in_at = Column(TIMESTAMP, nullable=False)
+    last_login_at = Column(TIMESTAMP, nullable=False)
 
     __table_args__ = (
         Index("external_id_index", "external_id"),
@@ -39,7 +39,17 @@ class UserModel(BaseModel):
     logo_url: str | None = None
     expired_at: datetime
     created_at: datetime
-    logged_in_at: datetime
+    last_login_at: datetime
 
 
+class UserResponseModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+
+    user_seq: int
+    email: str
+    first_name: str | None = None
+    last_name: str | None = None
+    oauth_provider: str
+    logo_url: str | None = None
+    last_login_at: datetime
 
