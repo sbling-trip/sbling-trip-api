@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.10-slim as base
+FROM python:3.10-slim as base
 
 FROM base as builder
 
@@ -23,10 +23,10 @@ ENV PYTHONPATH "${PYTHONPATH}:/usr/src/app"
 ENV ACCESS_LOG=""
 
 ENV APP_MODULE="api_python.app.main:app"
-ENV PORT=8080
+ENV PORT=8000
 
 COPY --from=builder /usr/src/app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY api_python api_python
+COPY ../sbling-trip-api/api_python api_python
 CMD uvicorn $APP_MODULE --host 0.0.0.0 --port $PORT

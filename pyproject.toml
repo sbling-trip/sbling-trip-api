@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "sibling-trip"
+name = "sbling-trip-api"
 version = "0.1.0"
 description = ""
 authors = ["hkim <hyeon000125@gmail.com>"]

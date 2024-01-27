@@ -7,7 +7,7 @@ from api_python.app.users.model.user_model import UserResponseModel
 from api_python.app.users.service.user_service import get_current_user_by_authorization, get_current_user_by_cookie
 
 user_router = APIRouter(
-    prefix="/users",
+    prefix="/user",
 )
 
 

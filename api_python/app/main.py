@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from api_python.app.common.client.resources import async_resource_list
+from api_python.app.common.phase import IS_PROD
 from api_python.app.security.cors import allow_origins
 from api_python.app.security.auth_router import auth_router
 from api_python.app.stay.stay_router import stay_router
@@ -37,7 +38,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -55,6 +56,6 @@ def health_check():
     """
     fastapi 프로젝트가 잘 작동하고 있는지 확인하기 위해 로드 밸런서가 주기적으로 health check를 호출한다.
     """
-    return {"status": "UP"}
+    return {"status": "UP", "is_prod": IS_PROD}
 
 

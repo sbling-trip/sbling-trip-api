@@ -6,6 +6,7 @@ from starlette.responses import RedirectResponse
 
 from api_python.app.common.api_response import ApiResponse
 from api_python.app.common.configuration import config
+from api_python.app.common.phase import IS_PROD
 from api_python.app.security.oauth_config import oauth
 from api_python.app.security.service.security_service import create_access_token
 
@@ -28,18 +29,22 @@ auth_router = APIRouter(
 )
 async def login_via_google(request: Request):
     # redirect_uri = request.url_for('auth_via_google')
-    redirect_uri = config["fastapi"]["redirect_url"]
+    print(f"start google oauth! request.session: {request.session}, request.code: {request.query_params.get('code'),} request.state: {request.query_params.get('state')}")
+    redirect_uri = config["fastapi"]["redirect_url"] if IS_PROD else request.url_for('auth_via_google')
+
     print(f"redirect_uri: {redirect_uri}")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
 @auth_router.post(
-    "/google/callback",
+    "/callback/google",
     summary="oauth 로그인 콜백",
     description="google 로그인 토큰 발급",
     tags=["oauth"],
 )
 async def auth_via_google(request: Request) -> RedirectResponse:
+    print(f"start callback! request.session: {request.session},request.code: {request.query_params.get('code'),} request.state: {request.query_params.get('state')}")
+
     token = await oauth.google.authorize_access_token(request)
 
     user = token['userinfo']
@@ -70,4 +75,3 @@ async def auth_via_google(request: Request) -> RedirectResponse:
         data={"sub": user["sub"], "exp": expired_at}
     )
     return ApiResponse.success(access_token)
-
