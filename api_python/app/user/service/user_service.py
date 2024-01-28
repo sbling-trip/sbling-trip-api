@@ -6,8 +6,8 @@ from fastapi import Depends
 from api_python.app.common.exceptions import credentials_exception, token_expired_exception
 from api_python.app.security.oauth_config import oauth2_scheme
 from api_python.app.security.service.security_service import decode_token, get_token_from_cookie
-from api_python.app.users.model.user_model import UserResponseModel
-from api_python.app.users.repository.user_repository import find_by_external_id_user_model, \
+from api_python.app.user.model.user_model import UserResponseModel
+from api_python.app.user.repository.user_repository import find_by_external_id_user_model, \
     find_by_external_id_user_response_model
 
 

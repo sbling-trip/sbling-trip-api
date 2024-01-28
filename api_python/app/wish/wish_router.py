@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Depends
 
 from api_python.app.common.api_response import ApiResponse
-from api_python.app.users.service.user_service import get_current_user_by_cookie
+from api_python.app.user.service.user_service import get_current_user_by_cookie
 
 wish_router = APIRouter(
     prefix="/wish",

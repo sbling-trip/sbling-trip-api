@@ -28,5 +28,5 @@ ENV PORT=8000
 COPY --from=builder /usr/src/app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY sbling-trip-api/api_python api_python
+COPY api_python api_python
 CMD uvicorn $APP_MODULE --host 0.0.0.0 --port $PORT

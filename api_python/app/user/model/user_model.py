@@ -9,7 +9,7 @@ from api_python.app.common.sql_alchemy import Base
 
 
 class UserOrm(Base):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     user_seq = Column(BigInteger, primary_key=True)
     email = Column(VARCHAR(255), nullable=False)

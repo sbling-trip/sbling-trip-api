@@ -10,8 +10,8 @@ from api_python.app.common.phase import IS_PROD
 from api_python.app.security.oauth_config import oauth
 from api_python.app.security.service.security_service import create_access_token
 
-from api_python.app.users.model.user_model import UserOrm
-from api_python.app.users.repository.user_repository import find_by_external_id_user_model, insert_user_from_orm, \
+from api_python.app.user.model.user_model import UserOrm
+from api_python.app.user.repository.user_repository import find_by_external_id_user_model, insert_user_from_orm, \
     update_user_expiration, update_user_login_at
 
 auth_router = APIRouter(

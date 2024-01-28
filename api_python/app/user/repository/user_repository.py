@@ -5,7 +5,7 @@ from sqlalchemy import select, ChunkedIteratorResult, update
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
 
-from api_python.app.users.model.user_model import UserModel, UserOrm, UserResponseModel
+from api_python.app.user.model.user_model import UserModel, UserOrm, UserResponseModel
 
 
 def user_orm_to_pydantic_model(result: ChunkedIteratorResult[Tuple[UserOrm]]) -> List[UserModel]:

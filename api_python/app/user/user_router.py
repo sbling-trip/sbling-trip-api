@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from api_python.app.common.api_response import ApiResponse
-from api_python.app.users.model.user_model import UserResponseModel
-from api_python.app.users.service.user_service import get_current_user_by_authorization, get_current_user_by_cookie
+from api_python.app.user.model.user_model import UserResponseModel
+from api_python.app.user.service.user_service import get_current_user_by_authorization, get_current_user_by_cookie
 
 user_router = APIRouter(
     prefix="/user",
