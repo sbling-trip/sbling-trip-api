@@ -160,3 +160,4 @@ cython_debug/
 .idea/
 
 api_python/resources/credentials.py
+data_generate/*.csv
