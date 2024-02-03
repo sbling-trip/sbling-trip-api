@@ -23,7 +23,10 @@ def get_user_seq_by_authorization(token: Annotated[str, Depends(oauth2_scheme)])
 # 비 로그인 유저 가능할 경우
 def get_user_seq_by_authorization_optional(token: Annotated[str, Depends(oauth2_scheme)]):
     if token:
-        return get_user_seq_by_token(token)
+        try:
+            return get_user_seq_by_token(token)
+        except credentials_exception:
+            return -1
     else:
         return -1
 
