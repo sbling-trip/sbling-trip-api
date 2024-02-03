@@ -120,5 +120,26 @@ class StayInfoWishModel(BaseModel):
     food_beverage_area: str | None = None
     wish_state: bool = False
 
-    # check_in_time_remove_second = field_validator('check_in_time')(remove_second)
-    # check_out_time_remove_second = field_validator('check_out_time')(remove_second)
+
+class StayInfoWishReviewModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+
+    stay_seq: int
+    stay_name: str | None = None
+    manager: str | None = None
+    contact_number: str | None = None
+    address: str | None = None
+    check_in_time: str | None = None
+    check_out_time: str | None = None
+    description: str | None = None
+    refund_policy: str | None = None
+    homepage_url: str | None = None
+    reservation_info: str | None = None
+    parking_available: bool | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    facilities_detail: str | None = None
+    food_beverage_area: str | None = None
+    wish_state: bool = False
+    review_count: int = 0
+    review_score: float = 0.0

@@ -11,11 +11,13 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 
-def decode_token(token: str):
+def decode_token(token: str, non_login_available: bool = False) -> dict:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError:
-        raise credentials_exception
+        if non_login_available:
+            return {"user_seq": -1}
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
 
     return payload
 
