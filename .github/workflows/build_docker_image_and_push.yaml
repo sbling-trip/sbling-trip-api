@@ -1,0 +1,31 @@
+name: api-python - Build Docker Image And Deploy
+on:
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - "tests/**"
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: self-hosted
+    env:
+      PREFIX: sibling-trip-api
+      REPO: hkimhub
+      TAG: latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: pyproject.toml
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.6.1
+      - name: Build Docker image
+        run: docker build -t ${{ env.REPO }}:${{ env.TAG }} .
+      - name: Stop existing container
+        run: docker stop my-container || true
+      - name: Deploy Docker image
+        run: docker run --rm --name sbling-trip-api --network my_custom_network -p 8000:8000 -e PHASE=prod ${{ env.REPO }}:${{ env.TAG }}
