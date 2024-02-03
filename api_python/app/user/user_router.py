@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from api_python.app.common.api_response import ApiResponse
 from api_python.app.user.model.user_model import UserResponseModel
-from api_python.app.user.service.user_service import get_current_user_by_authorization, get_current_user_by_cookie
+from api_python.app.user.service.user_service import get_user_seq_by_authorization, get_current_user_by_cookie
 
 user_router = APIRouter(
     prefix="/user",
@@ -18,7 +18,7 @@ user_router = APIRouter(
     tags=["유저"],
     deprecated=True,
 )
-async def get_user_info(user_response_model: Annotated[UserResponseModel, Depends(get_current_user_by_authorization)]):
+async def get_user_info(user_response_model: Annotated[int, Depends(get_user_seq_by_authorization)]):
     return ApiResponse.success(user_response_model)
 
 

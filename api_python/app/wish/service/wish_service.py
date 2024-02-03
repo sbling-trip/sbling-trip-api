@@ -1,6 +1,8 @@
-from api_python.app.stay.model.stay_model import StayInfoModel, StayInfoWishModel
+from api_python.app.stay.model.stay_model import StayInfoWishModel
 from api_python.app.wish.repository.wish_repository import insert_by_user_seq_stay_seq, update_by_user_seq_stay_seq, \
-    get_stay_info_for_user_wish, get_stay_info_with_for_user_wish_all
+    get_stay_info_for_user_wish
+
+LIMIT_COUNT = 20
 
 
 async def add_stay_wish_service(
@@ -20,15 +22,13 @@ async def remove_stay_wish_service(
 
 
 async def get_stay_wish_list_service(
-        user_seq: int
-) -> list[StayInfoModel]:
-    result = await get_stay_info_for_user_wish(user_seq)
-    return result
-
-
-async def get_stay_wish_all_list_service(
-        user_seq: int
+        user_seq: int,
+        cursor: int
 ) -> list[StayInfoWishModel]:
-    result = await get_stay_info_with_for_user_wish_all(user_seq)
+    result = await get_stay_info_for_user_wish(
+        user_seq=user_seq,
+        offset=cursor*LIMIT_COUNT,
+        limit=LIMIT_COUNT
+    )
     return result
 

@@ -1,10 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 
 from api_python.app.common.api_response import ApiResponse
-from api_python.app.stay.model.stay_model import StayInfoModel
-from api_python.app.stay.service.stay_service import get_stay_info_by_cursor
+from api_python.app.stay.model.stay_model import StayInfoWishModel
+from api_python.app.stay.service.stay_service import get_stay_wish_all_list_service
+from api_python.app.user.service.user_service import get_user_seq_by_authorization_optional
 
 stay_router = APIRouter(
     prefix="/stay",
@@ -18,7 +19,8 @@ stay_router = APIRouter(
     tags=["숙소"],
 )
 async def get_stay_list(
-        cursor: Annotated[int, Query(description="id 참조 지점", ge=0)] = 0,
-) -> ApiResponse[list[StayInfoModel]]:
-    result = await get_stay_info_by_cursor(cursor)
+        user_seq: Annotated[int, Depends(get_user_seq_by_authorization_optional)],
+        cursor: Annotated[int, Query(description="id 참조 지점", ge=0)] = 0
+) -> ApiResponse[list[StayInfoWishModel]]:
+    result = await get_stay_wish_all_list_service(cursor=cursor, user_seq=user_seq)
     return ApiResponse.success(result)

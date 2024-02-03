@@ -1,11 +1,11 @@
 # https://docs.pydantic.dev/2.5/concepts/models/#arbitrary-class-instances
-
 from datetime import time
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from pydantic.alias_generators import to_camel
 from sqlalchemy import Column, BigInteger, Boolean, TEXT, TIME, INTEGER, NUMERIC, VARCHAR
 
+from api_python.app.common.pydantic_validator import remove_second
 from api_python.app.common.sql_alchemy import Base
 
 
@@ -107,4 +107,18 @@ class StayInfoWishModel(BaseModel):
     manager: str | None = None
     contact_number: str | None = None
     address: str | None = None
-    wish: str | None = None
+    check_in_time: str | None = None
+    check_out_time: str | None = None
+    description: str | None = None
+    refund_policy: str | None = None
+    homepage_url: str | None = None
+    reservation_info: str | None = None
+    parking_available: bool | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    facilities_detail: str | None = None
+    food_beverage_area: str | None = None
+    wish_state: bool = False
+
+    # check_in_time_remove_second = field_validator('check_in_time')(remove_second)
+    # check_out_time_remove_second = field_validator('check_out_time')(remove_second)

@@ -15,4 +15,4 @@ oauth.register(
     authorize_state=SECRET_KEY
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)

@@ -1,34 +1,19 @@
 from datetime import datetime
-from typing import Optional, Tuple
+from textwrap import dedent
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import select, case, and_, ChunkedIteratorResult
+from sqlalchemy import text, dialects
 
-from api_python.app.stay.model.stay_model import StayInfoOrm, StayInfoModel
-from api_python.app.stay.repository.stay_repository import stay_orm_to_wish_pydantic_model, stay_orm_to_pydantic_model
+from api_python.app.stay.model.stay_model import StayInfoWishModel
 from api_python.app.wish.model.wish_model import WishOrm
 
-
-def stay_orm_to_pydantic_model_wish(result: ChunkedIteratorResult[Tuple[StayInfoOrm, Optional[str]]]) -> list[StayInfoModel]:
-    return [
-        StayInfoModel(
-            stay_seq=orm.stay_seq,
-            stay_name=orm.stay_name,
-            manager=orm.manager,
-            contact_number=orm.contact_number,
-            address=orm.address,
-            wish=wish if wish is not None else 'N'
-        )
-        for orm, wish in result.all()
-    ]
 
 async def insert_by_user_seq_stay_seq(user_seq: int, stay_seq: int) -> bool:
     async with postgres_client.session() as session:
         try:
             async with session.begin():
                 # 만약 이미 찜한 숙소라면 N으로 변경
-                stmt = insert(WishOrm).values(
+                stmt = dialects.postgresql.insert(WishOrm).values(
                     user_seq=user_seq,
                     stay_seq=stay_seq,
                     state='Y',
@@ -50,7 +35,7 @@ async def update_by_user_seq_stay_seq(user_seq: int, stay_seq) -> bool:
         try:
             async with session.begin():
                 # 만약 이미 찜한 숙소라면 N으로 변경
-                stmt = insert(WishOrm).values(
+                stmt = dialects.postgresql.insert(WishOrm).values(
                     user_seq=user_seq,
                     stay_seq=stay_seq,
                     state='N',
@@ -66,53 +51,60 @@ async def update_by_user_seq_stay_seq(user_seq: int, stay_seq) -> bool:
             return False
 
 
-async def get_stay_info_for_user_wish(user_seq: int) -> list[StayInfoModel]:
+async def get_stay_info_for_user_wish(
+        user_seq: int,
+        offset: int,
+        limit: int
+) -> list[StayInfoWishModel]:
     async with postgres_client.session() as session:
         try:
             async with session.begin():
-                # wish 테이블에서 state가 'Y'인 stay_seq 추출
-                subquery = select(WishOrm.stay_seq).where(
-                    WishOrm.user_seq == user_seq,
-                    WishOrm.state == 'Y'
-                ).subquery()
+                get_stay_info_with_wish_query = text(dedent(f"""
+                SELECT 
+                    si.stay_seq AS stay_seq, stay_name, manager, contact_number, address,
+                    TO_CHAR(check_in_time, 'HH24:MI') AS check_in_time, TO_CHAR(check_out_time, 'HH24:MI') AS check_out_time,
+                    description, refund_policy, homepage_url, reservation_info, parking_available, latitude,
+                    longitude, facilities_detail, food_beverage_area, state AS wish_state
+                FROM public.stay_info si
+                JOIN public.wish w ON si.stay_seq = w.stay_seq AND w.user_seq = {user_seq}
+                ORDER BY si.stay_seq
+                LIMIT {limit} OFFSET {offset}
+                ;
+                """))
+                result = await session.execute(get_stay_info_with_wish_query)
 
-                # 추출된 stay_seq를 사용하여 stay_info 테이블과 조인
-                stmt = select(StayInfoOrm).join(
-                    subquery, StayInfoOrm.stay_seq == subquery.c.stay_seq
-                )
-
-                result = await session.execute(stmt)
-                return stay_orm_to_pydantic_model(result)
+                stay_info_list = [StayInfoWishModel(**row) for row in result.mappings().all()]
+                return stay_info_list
         except Exception as e:
             print(e)
             return []
 
 
-async def get_stay_info_with_for_user_wish_all(user_seq: int):
-    async with postgres_client.session() as session:  # 비동기 세션 사용
+async def get_stay_info_with_for_user_wish_limit_offset(
+        user_seq: int,
+        offset: int,
+        limit: int
+) -> list[StayInfoWishModel]:
+    async with postgres_client.session() as session:
         try:
-            subquery = select(
-                StayInfoOrm,
-            ).outerjoin(
-                WishOrm.state,
-                and_(
-                    StayInfoOrm.stay_seq == WishOrm.stay_seq,  # stay_seq 기반으로 조인
-                    WishOrm.user_seq == user_seq,  # 특정 사용자의 위시리스트만 고려
-                    WishOrm.state == 'Y'  # 위시리스트 상태가 'Y'인 경우만 고려
-                )
-            ).subquery()
+            get_stay_info_with_wish_query = text(dedent(f"""
+            SELECT 
+                si.stay_seq AS stay_seq, stay_name, manager, contact_number, address,
+                TO_CHAR(check_in_time, 'HH24:MI') AS check_in_time, TO_CHAR(check_out_time, 'HH24:MI') AS check_out_time,
+                description, refund_policy, homepage_url, reservation_info, parking_available, latitude,
+                longitude, facilities_detail, food_beverage_area,
+                CASE WHEN w.stay_seq IS NOT NULL THEN True ELSE False END AS wish_state
+            FROM public.stay_info si
+            LEFT JOIN public.wish w ON si.stay_seq = w.stay_seq AND w.user_seq = {user_seq}
+            ORDER BY si.stay_seq
+            LIMIT {limit} OFFSET {offset}
+            ;
+            """))
 
-            stmt = select(subquery).add_columns(
-                case(
-                    subquery.state == "Y", "Y",
-                    else_="N"
-                )
-            )
+            result = await session.execute(get_stay_info_with_wish_query)
 
-            result = await session.execute(stmt)  # 비동기 쿼리 실행
-            pydantic_model = stay_orm_to_pydantic_model_wish(result)
-            print(pydantic_model)
-            return pydantic_model
+            stay_info_list = [StayInfoWishModel(**row) for row in result.mappings().all()]
+            return stay_info_list
 
         except Exception as e:
             print(e)
