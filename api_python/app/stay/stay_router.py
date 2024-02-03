@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from api_python.app.common.api_response import ApiResponse
-from api_python.app.stay.model.stay_info import StayInfoModel
+from api_python.app.stay.model.stay_model import StayInfoModel
 from api_python.app.stay.service.stay_service import get_stay_info_by_cursor
 
 stay_router = APIRouter(

@@ -1,4 +1,4 @@
-from api_python.app.stay.model.stay_info import StayInfoModel
+from api_python.app.stay.model.stay_model import StayInfoModel
 from api_python.app.stay.repository.stay_repository import find_by_seq_limit_offset
 
 LIMIT_COUNT = 20

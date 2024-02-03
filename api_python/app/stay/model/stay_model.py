@@ -97,3 +97,14 @@ class StayInfoModel(BaseModel):
     stay_detail: str | None = None
     facilities_detail: str | None = None
     food_beverage_area: str | None = None
+
+
+class StayInfoWishModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+
+    stay_seq: int
+    stay_name: str | None = None
+    manager: str | None = None
+    contact_number: str | None = None
+    address: str | None = None
+    wish: str | None = None
