@@ -16,7 +16,7 @@ wish_router = APIRouter(
 )
 
 
-@wish_router.get(
+@wish_router.post(
     "/add",
     summary="숙소 찜 목록 추가",
     description="찜 목록에 추가합니다. 추가할 숙소 seq를 받아서 추가합니다.",
@@ -30,7 +30,7 @@ async def add_stay_wish(
     return ApiResponse.success("Success")
 
 
-@wish_router.get(
+@wish_router.delete(
     "/remove",
     summary="숙소 찜 목록 삭제",
     description="찜 목록에서 삭제합니다. 삭제할 숙소 seq를 받아 삭제합니다.",

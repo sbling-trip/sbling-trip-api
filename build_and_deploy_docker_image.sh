@@ -10,6 +10,10 @@ set -e
 
 docker build -t hkimhub/sbling-trip-api:"$1" .
 docker stop sbling-trip-api || true
+while [ ! -z "$(docker ps -q -f name=sbling-trip-api)" ]; do
+    echo "Waiting for sbling-trip-api to stop..."
+    sleep 1
+done
 docker run -d --rm \
   --name sbling-trip-api \
   --network my_custom_network \
