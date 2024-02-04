@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Depends
 
 from api_python.app.common.api_response import ApiResponse
-from api_python.app.stay.model.stay_model import StayInfoWishModel
-from api_python.app.stay.service.stay_service import get_stay_wish_all_list_service
+from api_python.app.stay.model.stay_model import StayInfoWishModel, StayInfoWishReviewModel
+from api_python.app.stay.service.stay_service import get_stay_wish_all_list_service, get_stay_wish_review_list_service
 from api_python.app.user.service.user_service import get_user_seq_by_authorization_optional
 
 stay_router = APIRouter(
@@ -21,6 +21,6 @@ stay_router = APIRouter(
 async def get_stay_list(
         user_seq: Annotated[int, Depends(get_user_seq_by_authorization_optional)],
         cursor: Annotated[int, Query(description="id 참조 지점", ge=0)] = 0
-) -> ApiResponse[list[StayInfoWishModel]]:
-    result = await get_stay_wish_all_list_service(cursor=cursor, user_seq=user_seq)
+) -> ApiResponse[list[StayInfoWishReviewModel]]:
+    result = await get_stay_wish_review_list_service(cursor=cursor, user_seq=user_seq)
     return ApiResponse.success(result)

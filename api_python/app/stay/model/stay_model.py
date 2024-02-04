@@ -1,11 +1,10 @@
 # https://docs.pydantic.dev/2.5/concepts/models/#arbitrary-class-instances
 from datetime import time
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from sqlalchemy import Column, BigInteger, Boolean, TEXT, TIME, INTEGER, NUMERIC, VARCHAR
 
-from api_python.app.common.pydantic_validator import remove_second
 from api_python.app.common.sql_alchemy import Base
 
 
@@ -142,4 +141,4 @@ class StayInfoWishReviewModel(BaseModel):
     food_beverage_area: str | None = None
     wish_state: bool = False
     review_count: int = 0
-    review_score: float = 0.0
+    review_score_average: float = 0.0

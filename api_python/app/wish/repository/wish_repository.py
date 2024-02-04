@@ -80,7 +80,7 @@ async def get_stay_info_for_user_wish(
             return []
 
 
-async def get_stay_info_with_for_user_wish_limit_offset(
+async def get_stay_info_with_for_user_seq_limit_offset(
         user_seq: int,
         offset: int,
         limit: int
