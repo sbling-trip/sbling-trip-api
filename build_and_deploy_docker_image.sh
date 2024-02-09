@@ -1,9 +1,11 @@
 #!/bin/bash
-if [ "$1" = "" ]
-then
-  echo "Usage: $0 <image tag>"
+# Check if at least one argument is provided
+if [ "$1" = "" ]; then
+  echo "Usage: $0 <image tag> [environment]"
   exit 1
 fi
+
+environment=${2:-dev}
 
 # exit when any command fails
 set -e
@@ -18,7 +20,7 @@ docker run -d --rm \
   --name sbling-trip-api \
   --network my_custom_network \
   -p 8000:8000 \
-  -e PHASE=prod \
+  -e PHASE=$environment \
   hkimhub/sbling-trip-api:"$1"
 
 #docker push hkimhub/sibling-trip-api:"$1"
