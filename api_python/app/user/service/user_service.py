@@ -9,7 +9,7 @@ from api_python.app.security.service.security_service import decode_token, get_t
 
 def get_user_seq_by_token(token: str, non_login_available: bool = False) -> int:
     payload = decode_token(token, non_login_available)
-    return payload.get("user_seq")
+    return payload.get("userSeq")
 
 
 def get_user_seq_by_authorization(token: Annotated[str, Depends(oauth2_scheme)]):

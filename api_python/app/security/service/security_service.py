@@ -16,7 +16,7 @@ def decode_token(token: str, non_login_available: bool = False) -> dict:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError:
         if non_login_available:
-            return {"user_seq": -1}
+            return {"userSeq": -1}
         raise HTTPException(status_code=401, detail="Could not validate credentials")
 
     return payload
