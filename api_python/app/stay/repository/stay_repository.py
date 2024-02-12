@@ -51,6 +51,7 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
                     count(review_seq) AS review_count,
                     AVG(review_score)::numeric(10,1) AS review_score_average
                 FROM public.review
+                WHERE exposed = true
                 GROUP BY stay_seq
             )
             SELECT

@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
-from sqlalchemy import Column, BigInteger, VARCHAR, Integer, Index
+from sqlalchemy import Column, BigInteger, VARCHAR, Integer, Index, BOOLEAN
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from api_python.app.common.sql_alchemy import Base
@@ -25,6 +25,7 @@ class ReviewOrm(Base):
     review_image_url_list = Column(VARCHAR(255), nullable=True)
     created_at = Column(TIMESTAMP, nullable=False)
     modified_at = Column(TIMESTAMP, nullable=False)
+    exposed = Column(BOOLEAN, nullable=False)
 
     __table_args__ = (
         Index('user_seq_index', 'user_seq'),

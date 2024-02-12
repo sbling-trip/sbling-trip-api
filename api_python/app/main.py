@@ -52,11 +52,11 @@ app.include_router(review_router, prefix="/api")
 # app.include_router(auth_router)
 # app.include_router(user_router)
 
+
 @app.get("/actuator/health")
 def health_check():
     """
     fastapi 프로젝트가 잘 작동하고 있는지 확인하기 위해 로드 밸런서가 주기적으로 health check를 호출한다.
     """
     return {"status": "UP", "is_prod": IS_PROD}
-
 
