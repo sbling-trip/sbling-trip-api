@@ -34,7 +34,6 @@ async def update_by_user_seq_stay_seq(user_seq: int, stay_seq) -> bool:
     async with postgres_client.session() as session:
         try:
             async with session.begin():
-                # 만약 이미 찜한 숙소라면 N으로 변경
                 stmt = dialects.postgresql.insert(WishOrm).values(
                     user_seq=user_seq,
                     stay_seq=stay_seq,

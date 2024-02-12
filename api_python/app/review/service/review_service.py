@@ -1,7 +1,8 @@
 from typing import List
 
 from api_python.app.review.model.review_model import UserResponseReviewModel
-from api_python.app.review.repository.review_repository import get_stay_review_limit_offset, add_review
+from api_python.app.review.repository.review_repository import get_stay_review_limit_offset, add_review, update_review, \
+    remove_review
 
 LIMIT_COUNT = 10
 
@@ -31,4 +32,24 @@ async def add_review_info_service(
         review_score=review_score,
         review_image_url_list=[]
     )
+    return True
+
+
+async def update_review_info_service(
+        review_seq: int,
+        review_title: str | None,
+        review_content: str | None,
+        review_score: int | None
+) -> bool:
+    await update_review(
+        review_seq=review_seq,
+        review_title=review_title,
+        review_content=review_content,
+        review_score=review_score
+    )
+    return True
+
+
+async def remove_review_service(review_seq: int) -> bool:
+    await remove_review(review_seq=review_seq)
     return True
