@@ -14,6 +14,20 @@ wish_router = APIRouter(
 )
 
 
+@wish_router.get(
+    "/list",
+    summary="숙소 찜 목록 조회",
+    description="찜 목록을 조회합니다. cursor를 통해 페이징 처리가 가능합니다(cursor는 0부터 시작, 기본값은 0 입니다.)",
+    tags=["찜"],
+)
+async def get_stay_wish_list(
+        user_seq: Annotated[int, user_seq_dependency],
+        cursor: Annotated[int, Query(description="id 참조 지점", ge=0)] = 0,
+) -> ApiResponse[list[StayInfoWishModel]]:
+    result = await get_stay_wish_list_service(cursor=cursor, user_seq=user_seq)
+    return ApiResponse.success(result)
+
+
 @wish_router.post(
     "/add",
     summary="숙소 찜 목록 추가",
@@ -40,17 +54,3 @@ async def remove_stay_wish(
 ) -> ApiResponse[str]:
     await remove_stay_wish_service(user_seq=user_seq, stay_seq=stay_seq)
     return ApiResponse.success("Success")
-
-
-@wish_router.get(
-    "/list",
-    summary="숙소 찜 목록 조회",
-    description="찜 목록을 조회합니다. cursor를 통해 페이징 처리가 가능합니다(cursor는 0부터 시작, 기본값은 0 입니다.)",
-    tags=["찜"],
-)
-async def get_stay_wish_list(
-        user_seq: Annotated[int, user_seq_dependency],
-        cursor: Annotated[int, Query(description="id 참조 지점", ge=0)] = 0,
-) -> ApiResponse[list[StayInfoWishModel]]:
-    result = await get_stay_wish_list_service(cursor=cursor, user_seq=user_seq)
-    return ApiResponse.success(result)

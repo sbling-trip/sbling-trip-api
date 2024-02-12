@@ -56,7 +56,8 @@ async def add_review_info(
 @review_router.put(
     "/update",
     summary="리뷰 수정",
-    description="숙소의 리뷰를 수정합니다. 현재 이미지 수정은 미구현 상태입니다. 추후 업데이트 예정입니다.",
+    description="숙소의 리뷰를 수정합니다. 리뷰 seq를 통해 수정합니다. 입력하지 않은 필드 값 데이터는 수정되지 않습니다."
+                " 현재 이미지 수정은 미구현 상태입니다. 추후 업데이트 예정입니다.",
     tags=["리뷰"],
 )
 async def update_review_info(
