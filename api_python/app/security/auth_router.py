@@ -6,6 +6,7 @@ from starlette.responses import RedirectResponse
 
 from api_python.app.common.api_response import ApiResponse
 from api_python.app.common.configuration import config
+from api_python.app.common.kst_time import get_kst_time_now
 from api_python.app.common.phase import IS_PROD
 from api_python.app.security.oauth_config import oauth
 from api_python.app.security.service.security_service import create_access_token
@@ -49,7 +50,7 @@ async def auth_via_google(request: Request) -> RedirectResponse:
 
     user = token['userinfo']
     user_model = await find_by_external_id_user_model(user['sub'])
-    expired_at = datetime.utcnow() + timedelta(hours=12)
+    expired_at = get_kst_time_now() + timedelta(hours=12)
     login_at = datetime.now(tz=timezone("Asia/Seoul")).replace(tzinfo=None)
     if user_model:
         await update_user_expiration(user['sub'], expired_at)
@@ -63,10 +64,9 @@ async def auth_via_google(request: Request) -> RedirectResponse:
             last_name=user['family_name'],
             oauth_provider="google",
             logo_url=user['picture'],
-            # utcnow()에서 12시간을 더한 값을 unix timestamp로 변환
             expired_at=expired_at,
-            created_at=datetime.utcnow(),
-            logged_in_at=datetime.utcnow(),
+            created_at=get_kst_time_now(),
+            logged_in_at=get_kst_time_now(),
         )
         await insert_user_from_orm(new_user)
         print(f"insert new user {user['name']}")

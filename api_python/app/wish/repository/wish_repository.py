@@ -1,9 +1,12 @@
 from datetime import datetime
 from textwrap import dedent
 
+from pytz import timezone
+
 from api_python.app.common.client.postgres.postgres_client import postgres_client
 from sqlalchemy import text, dialects
 
+from api_python.app.common.kst_time import get_kst_time_now
 from api_python.app.stay.model.stay_model import StayInfoWishModel
 from api_python.app.wish.model.wish_model import WishOrm
 
@@ -17,11 +20,11 @@ async def insert_by_user_seq_stay_seq(user_seq: int, stay_seq: int) -> bool:
                     user_seq=user_seq,
                     stay_seq=stay_seq,
                     state='Y',
-                    wished_at=datetime.utcnow(),
-                    modified_at=datetime.utcnow()
+                    wished_at=get_kst_time_now(),
+                    modified_at=get_kst_time_now()
                 ).on_conflict_do_update(
                     index_elements=['user_seq', 'stay_seq'],
-                    set_={'state': 'Y', 'modified_at': datetime.utcnow()}
+                    set_={'state': 'Y', 'modified_at': get_kst_time_now()}
                 )
                 await session.execute(stmt)
                 return True
@@ -39,11 +42,11 @@ async def update_by_user_seq_stay_seq(user_seq: int, stay_seq) -> bool:
                     user_seq=user_seq,
                     stay_seq=stay_seq,
                     state='N',
-                    wished_at=datetime.utcnow(),
-                    modified_at=datetime.utcnow()
+                    wished_at=get_kst_time_now(),
+                    modified_at=get_kst_time_now()
                 ).on_conflict_do_update(
                     index_elements=['user_seq', 'stay_seq'],
-                    set_={'state': 'N', 'modified_at': datetime.utcnow()}
+                    set_={'state': 'N', 'modified_at': get_kst_time_now()}
                 )
                 await session.execute(stmt)
         except Exception as e:
