@@ -28,6 +28,7 @@ async def add_review_info_service(
         room_seq=room_seq,
         review_title=review_title,
         review_content=review_content,
-        review_score=review_score
+        review_score=review_score,
+        review_image_url_list=[]
     )
     return True

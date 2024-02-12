@@ -5,7 +5,7 @@ from urllib.parse import quote_plus
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncEngine
 
 from api_python.app.common.client.async_context_resource import AsyncContextResource
-from api_python.app.common.configuration import config
+from api_python.app.common.config.configuration import config
 
 
 class PostgresClient(AsyncContextResource):

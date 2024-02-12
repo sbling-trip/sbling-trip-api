@@ -1,15 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query
 
 from api_python.app.common.api_response import ApiResponse
+from api_python.app.common.depends.depends import user_seq_dependency
 from api_python.app.stay.model.stay_model import StayInfoWishModel
-from api_python.app.user.service.user_service import get_user_seq_by_authorization, \
-    get_user_seq_by_authorization_optional
 from api_python.app.wish.repository.wish_repository import update_by_user_seq_stay_seq
 from api_python.app.wish.service.wish_service import add_stay_wish_service, get_stay_wish_list_service
-
-user_seq_dependency = Depends(get_user_seq_by_authorization)
 
 wish_router = APIRouter(
     prefix="/wish",

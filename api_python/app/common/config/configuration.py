@@ -18,7 +18,7 @@ class Configuration:
             cls._instance.config = ConfigParser()
             # unit test 환경에서도 파일을 잘 찾을 수 있도록 __file__과 상대경로를 이용
             current_file_directory = os.path.dirname(os.path.abspath(__file__))
-            config_file = os.path.abspath(f"{current_file_directory}/../../resources/config-{phase}.ini")
+            config_file = os.path.abspath(f"{current_file_directory}/../../../resources/config-{phase}.ini")
             cls._instance.config.read(config_file)
             # logging_config_file = os.path.abspath(
             #     f"{current_file_directory}/../../resources/logging/logging-{phase}.ini"

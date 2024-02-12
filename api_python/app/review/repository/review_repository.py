@@ -1,9 +1,10 @@
-from datetime import datetime
 from textwrap import dedent
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
 from sqlalchemy import text, dialects
 
+from api_python.app.common.exceptions import add_review_exception, get_review_exception
+from api_python.app.common.kst_time import get_kst_time_now
 from api_python.app.review.model.review_model import UserResponseReviewModel, ReviewModel, \
     convert_review_model_to_response, ReviewOrm
 
@@ -33,8 +34,7 @@ async def get_stay_review_limit_offset(
             return stay_review
 
         except Exception as e:
-            print(e)
-            return []
+            raise get_review_exception(str(e))
 
 
 async def add_review(
@@ -44,9 +44,20 @@ async def add_review(
         review_title: str,
         review_content: str,
         review_score: int,
-        review_image_url_list: list[str] = []
+        review_image_url_list: list[str]
 ) -> bool:
     async with postgres_client.session() as session:
+        # 해당 stay_seq와 room_seq가 존재하는지 확인
+        check_room_query = text(dedent(f"""
+        SELECT room_seq, stay_seq
+        FROM public.room_info
+        WHERE room_seq = {room_seq} AND stay_seq = {stay_seq}
+        LIMIT 1
+        """))
+
+        result = await session.execute(check_room_query)
+        if not result.fetchone():
+            raise add_review_exception("해당 숙소와 방이 존재하지 않습니다. staySeq와 roomSeq를 확인해주세요.")
         try:
             stmt = dialects.postgresql.insert(ReviewOrm).values(
                 user_seq=user_seq,
@@ -55,12 +66,14 @@ async def add_review(
                 review_title=review_title,
                 review_content=review_content,
                 review_score=review_score,
-                review_image_url_list=review_image_url_list,
-                created_at=datetime.utcnow(),
-                modified_at=datetime.utcnow()
+                review_image_url_list=str(review_image_url_list),
+                created_at=get_kst_time_now(),
+                modified_at=get_kst_time_now(),
+                exposed=True
             )
             await session.execute(stmt)
+            await session.commit()
             return True
         except Exception as e:
-            print(e)
-            return False
+            await session.rollback()
+            raise add_review_exception(str(e))

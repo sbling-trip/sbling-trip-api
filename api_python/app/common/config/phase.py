@@ -1,4 +1,4 @@
-from api_python.app.common.configuration import config
+from api_python.app.common.config.configuration import config
 
 
 IS_PROD = config["general"]["phase"] == "prod"

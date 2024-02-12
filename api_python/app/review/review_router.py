@@ -1,11 +1,12 @@
-from typing import Annotated, List
+from typing import Annotated
 
-from fastapi import APIRouter, Query, File, UploadFile, Body, Depends
+from fastapi import APIRouter, Query
 
 from api_python.app.common.api_response import ApiResponse
+from api_python.app.common.config.phase import IS_LOCAL
+from api_python.app.common.depends.depends import user_seq_dependency_optional, user_seq_dependency
 from api_python.app.review.model.review_model import UserResponseReviewModel
 from api_python.app.review.service.review_service import get_review_info_by_stay_seq_service, add_review_info_service
-from api_python.app.user.service.user_service import get_user_seq_by_authorization
 
 review_router = APIRouter(
     prefix="/review",
@@ -33,7 +34,7 @@ async def get_review_info(
     tags=["리뷰"],
 )
 async def add_review_info(
-        user_seq: Annotated[int, Depends(get_user_seq_by_authorization)],
+        user_seq: Annotated[int, user_seq_dependency_optional if IS_LOCAL else user_seq_dependency],
         stay_seq: Annotated[int, Query(alias="staySeq", description="숙소 seq", ge=1)],
         room_seq: Annotated[int, Query(alias="roomSeq", description="객실 seq", ge=1)],
         review_title: Annotated[str, Query(alias="reviewTitle", description="리뷰 제목", min_length=1, max_length=50)],
@@ -41,11 +42,11 @@ async def add_review_info(
         review_score: Annotated[int, Query(alias="reviewScore", description="별점", ge=1, le=5)],
 ) -> ApiResponse[str]:
     await add_review_info_service(
-        user_seq,
-        stay_seq,
-        room_seq,
-        review_title,
-        review_content,
-        review_score
+        user_seq=user_seq,
+        stay_seq=stay_seq,
+        room_seq=room_seq,
+        review_title=review_title,
+        review_content=review_content,
+        review_score=review_score
     )
     return ApiResponse.success("Success")

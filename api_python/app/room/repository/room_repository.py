@@ -3,6 +3,7 @@ from typing import Tuple, List
 from sqlalchemy import select, ChunkedIteratorResult
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
+from api_python.app.common.exceptions import get_room_info_exception
 from api_python.app.room.model.room_model import RoomOrm, RoomModel
 
 
@@ -12,8 +13,11 @@ def room_orm_to_pydantic_model(result: ChunkedIteratorResult[Tuple[RoomOrm]]) ->
 
 async def find_by_stay_seq_room_model(stay_seq: int) -> List[RoomModel]:
     async with postgres_client.session() as session:
-        async with session.begin():
-            result = await session.execute(
-                select(RoomOrm).filter(RoomOrm.stay_seq == stay_seq)
-            )
-            return room_orm_to_pydantic_model(result)
+        try:
+            async with session.begin():
+                result = await session.execute(
+                    select(RoomOrm).filter(RoomOrm.stay_seq == stay_seq)
+                )
+                return room_orm_to_pydantic_model(result)
+        except Exception as e:
+            raise get_room_info_exception(str(e))

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from api_python.app.common.client.resources import async_resource_list
-from api_python.app.common.phase import IS_PROD
+from api_python.app.common.config.phase import IS_PROD
 from api_python.app.review.review_router import review_router
 from api_python.app.room.room_router import room_router
 from api_python.app.security.cors import allow_origins

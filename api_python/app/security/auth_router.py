@@ -5,9 +5,9 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 from api_python.app.common.api_response import ApiResponse
-from api_python.app.common.configuration import config
+from api_python.app.common.config.configuration import config
 from api_python.app.common.kst_time import get_kst_time_now
-from api_python.app.common.phase import IS_PROD
+from api_python.app.common.config.phase import IS_PROD
 from api_python.app.security.oauth_config import oauth
 from api_python.app.security.service.security_service import create_access_token
 

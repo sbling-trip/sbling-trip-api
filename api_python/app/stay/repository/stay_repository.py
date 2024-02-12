@@ -4,6 +4,7 @@ from textwrap import dedent
 from sqlalchemy import select, ChunkedIteratorResult
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
+from api_python.app.common.exceptions import get_stay_info_exception
 from api_python.app.stay.model.stay_model import StayInfoModel, StayInfoOrm, StayInfoWishReviewModel
 from sqlalchemy import text
 
@@ -75,5 +76,4 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
             return stay_info_list
 
         except Exception as e:
-            print(e)
-            return []
+            raise get_stay_info_exception(str(e))

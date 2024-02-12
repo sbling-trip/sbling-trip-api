@@ -1,11 +1,9 @@
-from datetime import datetime
 from textwrap import dedent
-
-from pytz import timezone
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
 from sqlalchemy import text, dialects
 
+from api_python.app.common.exceptions import add_wish_exception, delete_wish_exception, get_wish_exception
 from api_python.app.common.kst_time import get_kst_time_now
 from api_python.app.stay.model.stay_model import StayInfoWishModel
 from api_python.app.wish.model.wish_model import WishOrm
@@ -29,8 +27,7 @@ async def insert_by_user_seq_stay_seq(user_seq: int, stay_seq: int) -> bool:
                 await session.execute(stmt)
                 return True
         except Exception as e:
-            print(e)
-            return False
+            raise add_wish_exception(str(e))
 
 
 async def update_by_user_seq_stay_seq(user_seq: int, stay_seq) -> bool:
@@ -49,9 +46,9 @@ async def update_by_user_seq_stay_seq(user_seq: int, stay_seq) -> bool:
                     set_={'state': 'N', 'modified_at': get_kst_time_now()}
                 )
                 await session.execute(stmt)
+                return True
         except Exception as e:
-            print(e)
-            return False
+            raise delete_wish_exception(str(e))
 
 
 async def get_stay_info_for_user_wish(
@@ -79,8 +76,7 @@ async def get_stay_info_for_user_wish(
                 stay_info_list = [StayInfoWishModel(**row) for row in result.mappings().all()]
                 return stay_info_list
         except Exception as e:
-            print(e)
-            return []
+            raise get_wish_exception(str(e))
 
 
 async def get_stay_info_with_for_user_seq_limit_offset(
@@ -110,5 +106,4 @@ async def get_stay_info_with_for_user_seq_limit_offset(
             return stay_info_list
 
         except Exception as e:
-            print(e)
-            return []
+            raise get_wish_exception(str(e))
