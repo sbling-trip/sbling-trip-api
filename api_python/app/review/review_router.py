@@ -15,7 +15,7 @@ review_router = APIRouter(
 
 
 @review_router.get(
-    "/info",
+    "/list",
     summary="리뷰 조회",
     description="숙소의 리뷰를 조회합니다. staySeq와 cursor를 통해 조회합니다. 10개씩 조회합니다.",
     tags=["리뷰"],

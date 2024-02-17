@@ -71,9 +71,45 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
             """))
 
             result = await session.execute(get_stay_info_with_wish_review_query)
+            stay_model_list = [StayInfoWishReviewModel(**row) for row in result.mappings().all()]
+            return stay_model_list
 
-            stay_info_list = [StayInfoWishReviewModel(**row) for row in result.mappings().all()]
-            return stay_info_list
+        except Exception as e:
+            raise get_stay_info_exception(str(e))
+
+
+async def get_stay_info_by_stay_seq(user_seq: int, stay_seq: int) -> StayInfoWishReviewModel:
+    async with postgres_client.session() as session:
+        try:
+            get_stay_info_with_wish_review_query = text(dedent(f"""
+            WITH review_stat AS (
+                SELECT 
+                    stay_seq,
+                    count(review_seq) AS review_count,
+                    AVG(review_score)::numeric(10,1) AS review_score_average
+                FROM public.review
+                WHERE exposed = true
+                GROUP BY stay_seq
+            )
+            SELECT
+                si.stay_seq AS stay_seq, stay_name, manager, contact_number, address,
+                TO_CHAR(check_in_time, 'HH24:MI') AS check_in_time, TO_CHAR(check_out_time, 'HH24:MI') AS check_out_time,
+                description, refund_policy, homepage_url, reservation_info, parking_available, latitude,
+                longitude, facilities_detail, food_beverage_area,
+                CASE WHEN w.stay_seq IS NOT NULL THEN True ELSE False END AS wish_state,
+                rs.review_count, rs.review_score_average
+            FROM public.stay_info si
+            LEFT JOIN public.wish w ON si.stay_seq = w.stay_seq and w.user_seq = {user_seq}
+            JOIN review_stat rs ON si.stay_seq = rs.stay_seq
+            WHERE si.stay_seq = {stay_seq}
+            ;
+            """))
+
+            result = await session.execute(get_stay_info_with_wish_review_query)
+
+            result_model = result.mappings().fetchone()
+            stay_info_wish_review = StayInfoWishReviewModel(**result_model)
+            return stay_info_wish_review
 
         except Exception as e:
             raise get_stay_info_exception(str(e))
