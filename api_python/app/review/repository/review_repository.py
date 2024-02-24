@@ -25,7 +25,7 @@ async def get_stay_review_limit_offset(
             FROM public.review r
             JOIN room_info ri ON r.room_seq = ri.room_seq AND r.stay_seq = {stay_seq}
             WHERE exposed = true
-            ORDER BY modified_at DESC review_seq DESC
+            ORDER BY modified_at DESC, review_seq DESC
             LIMIT {limit} OFFSET {offset}
             ;   
             """))
