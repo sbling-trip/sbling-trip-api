@@ -60,7 +60,7 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
                 TO_CHAR(check_in_time, 'HH24:MI') AS check_in_time, TO_CHAR(check_out_time, 'HH24:MI') AS check_out_time,
                 description, refund_policy, homepage_url, reservation_info, parking_available, latitude,
                 longitude, facilities_detail, food_beverage_area,
-                CASE WHEN w.stay_seq IS NOT NULL THEN True ELSE False END AS wish_state,
+                CASE WHEN w.stay_seq IS NOT NULL AND w.state = 'Y' THEN True ELSE False END AS wish_state,
                 rs.review_count, rs.review_score_average
             FROM public.stay_info si
             LEFT JOIN public.wish w ON si.stay_seq = w.stay_seq AND w.user_seq = {user_seq}
@@ -96,7 +96,7 @@ async def get_stay_info_by_stay_seq(user_seq: int, stay_seq: int) -> StayInfoWis
                 TO_CHAR(check_in_time, 'HH24:MI') AS check_in_time, TO_CHAR(check_out_time, 'HH24:MI') AS check_out_time,
                 description, refund_policy, homepage_url, reservation_info, parking_available, latitude,
                 longitude, facilities_detail, food_beverage_area,
-                CASE WHEN w.stay_seq IS NOT NULL THEN True ELSE False END AS wish_state,
+                CASE WHEN w.stay_seq IS NOT NULL AND w.state = 'Y' THEN True ELSE False END AS wish_state,
                 rs.review_count, rs.review_score_average
             FROM public.stay_info si
             LEFT JOIN public.wish w ON si.stay_seq = w.stay_seq and w.user_seq = {user_seq}

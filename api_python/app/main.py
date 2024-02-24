@@ -44,11 +44,16 @@ app.add_middleware(
 
 
 app.add_middleware(SessionMiddleware, secret_key=get_random_string())
-
-app.include_router(stay_router, prefix="/api")
-app.include_router(wish_router, prefix="/api")
-app.include_router(room_router, prefix="/api")
-app.include_router(review_router, prefix="/api")
+if IS_PROD:
+    app.include_router(stay_router)
+    app.include_router(wish_router)
+    app.include_router(room_router)
+    app.include_router(review_router)
+else:
+    app.include_router(stay_router, prefix="/api")
+    app.include_router(wish_router, prefix="/api")
+    app.include_router(room_router, prefix="/api")
+    app.include_router(review_router, prefix="/api")
 # app.include_router(auth_router)
 # app.include_router(user_router)
 
