@@ -65,6 +65,7 @@ else:
     app.include_router(point_router, prefix="/api")
     app.include_router(reservation_router, prefix="/api")
 
+
 @app.get("/actuator/health")
 def health_check():
     """

@@ -57,9 +57,15 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
                 GROUP BY stay_seq
             ),
             room_image AS (
-                SELECT DISTINCT(si.stay_seq), room_image_url_list 
-                FROM room_info
-                JOIN stay_info si ON room_info.stay_seq = si.stay_seq
+                SELECT si.stay_seq,
+                       (
+                        SELECT room_image_url_list
+                        FROM room_info
+                        WHERE room_info.stay_seq = si.stay_seq
+                        ORDER BY room_info.room_seq DESC
+                        LIMIT 1
+                        ) AS room_image_url_list
+                FROM stay_info si
             )
             SELECT
                 si.stay_seq AS stay_seq, stay_name, manager, contact_number, address,
@@ -78,7 +84,8 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
             """))
 
             result = await session.execute(get_stay_info_with_wish_review_query)
-            stay_model_list = [convert_stay_info_model_to_response(StayInfoWishReviewModel(**row)) for row in result.mappings().all()]
+            stay_model_list = [convert_stay_info_model_to_response(StayInfoWishReviewModel(**row))
+                               for row in result.mappings().all()]
             return stay_model_list
 
         except Exception as e:
