@@ -20,10 +20,3 @@ def decode_token(token: str, non_login_available: bool = False) -> dict:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
 
     return payload
-
-
-async def get_token_from_cookie(request: Request):
-    access_token = request.cookies.get('access_token')
-    if not access_token:
-        raise HTTPException(status_code=401, detail="Access token missing in cookies")
-    return access_token

@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - 15432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=sbling
+      - POSTGRES_DB=sbling-trip
+    networks:
+      - default
+      - sbling-net
+
+networks:
+  sbling-net:
+    driver: bridge
