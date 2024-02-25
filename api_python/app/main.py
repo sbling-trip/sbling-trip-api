@@ -12,13 +12,14 @@ from api_python.app.room.room_router import room_router
 from api_python.app.security.cors import allow_origins
 from api_python.app.stay.stay_router import stay_router
 from api_python.app.wish.wish_router import wish_router
+from api_python.app.user.user_router import user_router
 
 import random
 import string
 
 
 def get_random_string(length=10):
-    result_str = ''.join(random.choice(string.ascii_letters) for i in range(length))
+    result_str = "".join(random.choice(string.ascii_letters) for i in range(length))
     return result_str
 
 
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI):
 
         # running application
         yield
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -45,11 +47,13 @@ app.add_middleware(
 
 app.add_middleware(SessionMiddleware, secret_key=get_random_string())
 if IS_PROD:
+    app.include_router(user_router)
     app.include_router(stay_router)
     app.include_router(wish_router)
     app.include_router(room_router)
     app.include_router(review_router)
 else:
+    app.include_router(user_router, prefix="/api")
     app.include_router(stay_router, prefix="/api")
     app.include_router(wish_router, prefix="/api")
     app.include_router(room_router, prefix="/api")
@@ -64,4 +68,3 @@ def health_check():
     fastapi 프로젝트가 잘 작동하고 있는지 확인하기 위해 로드 밸런서가 주기적으로 health check를 호출한다.
     """
     return {"status": "UP", "is_prod": IS_PROD}
-

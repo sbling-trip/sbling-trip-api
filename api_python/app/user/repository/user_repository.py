@@ -1,58 +1,66 @@
 from datetime import datetime
+from api_python.app.common.kst_time import get_kst_time_now
 from typing import Tuple, List
+from textwrap import dedent
+from api_python.app.common.exceptions import get_user_exception, update_user_exception
 
-from sqlalchemy import select, ChunkedIteratorResult, update
+from sqlalchemy import text
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
 
-from api_python.app.user.model.user_model import UserModel, UserOrm, UserResponseModel
+from api_python.app.user.model.user_model import UserModel
 
 
-def user_orm_to_pydantic_model(result: ChunkedIteratorResult[Tuple[UserOrm]]) -> List[UserModel]:
-    return [UserModel.model_validate(orm) for orm in result.scalars().all()]
-
-
-async def find_by_external_id_user_model(external_id: str) -> UserModel:
+async def update_user(
+    user_seq: int,
+    user_name: str | None,
+    location_agree: bool | None,
+    marketing_agree: bool | None,
+) -> bool:
+    user = await find_by_user_seq(user_seq)
     async with postgres_client.session() as session:
-        async with session.begin():
-            result = await session.execute(
-                select(UserOrm).filter(UserOrm.external_id == external_id)
+        try:
+            async with session.begin():
+                update_user = text(
+                    dedent(
+                        f"""
+                            UPDATE users 
+                            SET
+                            user_name = '{user.user_name if user_name == None else user_name}',
+                            location_agree = {user.location_agree if location_agree == None else location_agree},
+                            marketing_agree = {user.marketing_agree if marketing_agree == None else marketing_agree},
+                            updated_at = '{get_kst_time_now()}'
+                            WHERE
+                            user_seq = {user_seq};
+                           """
+                    )
+                )
+                await session.execute(update_user)
+                return True
+
+        except Exception as e:
+            await session.rollback()
+            raise update_user_exception(str(e))
+
+
+async def find_by_user_seq(user_seq: int) -> UserModel:
+    async with postgres_client.session() as session:
+        try:
+            get_user_me = text(
+                dedent(
+                    f"""
+                     SELECT *
+                     FROM users
+                     WHERE user_seq = {user_seq};
+                     """
+                )
             )
-            orm = result.scalars().first()
-            return UserModel.model_validate(orm) if orm else None
 
+            result = await session.execute(get_user_me)
 
-async def find_by_external_id_user_response_model(external_id: str) -> UserResponseModel:
-    async with postgres_client.session() as session:
-        async with session.begin():
-            result = await session.execute(
-                select(UserOrm).filter(UserOrm.external_id == external_id)
-            )
-            orm = result.scalars().first()
-            return UserResponseModel.model_validate(orm) if orm else None
+            result_model = result.mappings().fetchone()
+            stay_info_wish_review = UserModel(**result_model)
+            return stay_info_wish_review
 
-
-async def insert_user_from_orm(user: UserOrm) -> bool:
-    async with postgres_client.session() as session:
-        async with session.begin():
-            session.add(user)
-            await session.flush()
-    return True
-
-
-async def update_user_expiration(external_id: str, update_data: datetime) -> bool:
-    async with postgres_client.session() as session:
-        async with session.begin():
-            await session.execute(
-                update(UserOrm).where(UserOrm.external_id == external_id).values(expired_at=update_data)
-            )
-    return True
-
-
-async def update_user_login_at(external_id: str, last_login_at: datetime) -> bool:
-    async with postgres_client.session() as session:
-        async with session.begin():
-            await session.execute(
-                update(UserOrm).where(UserOrm.external_id == external_id).values(last_login_at=last_login_at)
-            )
-    return True
+        except Exception as e:
+            raise get_user_exception(str(e))
