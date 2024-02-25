@@ -35,7 +35,7 @@ async def get_stay_list(
 async def get_stay_info(
         user_seq: Annotated[int, user_seq_dependency_optional],
         stay_seq: Annotated[int, Query(alias="staySeq", description="숙소 seq", ge=1)]
-) -> ApiResponse[StayInfoWishReviewModel]:
+) -> ApiResponse[UserResponseStayInfoModel]:
     result = await get_stay_info_service(
         user_seq=user_seq,
         stay_seq=stay_seq

@@ -38,7 +38,7 @@ async def get_stay_wish_review_list_service(
 async def get_stay_info_service(
         user_seq: int,
         stay_seq: int
-) -> StayInfoWishReviewModel:
+) -> UserResponseStayInfoModel:
     return await get_stay_info_by_stay_seq(
         user_seq=user_seq,
         stay_seq=stay_seq

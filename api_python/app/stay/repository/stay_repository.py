@@ -92,7 +92,7 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
             raise get_stay_info_exception(str(e))
 
 
-async def get_stay_info_by_stay_seq(user_seq: int, stay_seq: int) -> StayInfoWishReviewModel:
+async def get_stay_info_by_stay_seq(user_seq: int, stay_seq: int) -> UserResponseStayInfoModel:
     async with postgres_client.session() as session:
         try:
             get_stay_info_with_wish_review_query = text(dedent(f"""
@@ -104,6 +104,17 @@ async def get_stay_info_by_stay_seq(user_seq: int, stay_seq: int) -> StayInfoWis
                 FROM public.review
                 WHERE exposed = true
                 GROUP BY stay_seq
+            ),
+            room_image AS (
+                SELECT si.stay_seq,
+                       (
+                        SELECT room_image_url_list
+                        FROM room_info
+                        WHERE room_info.stay_seq = si.stay_seq
+                        ORDER BY room_info.room_seq DESC
+                        LIMIT 1
+                        ) AS room_image_url_list
+                FROM stay_info si
             )
             SELECT
                 si.stay_seq AS stay_seq, stay_name, manager, contact_number, address,
@@ -111,10 +122,11 @@ async def get_stay_info_by_stay_seq(user_seq: int, stay_seq: int) -> StayInfoWis
                 description, refund_policy, homepage_url, reservation_info, parking_available, latitude,
                 longitude, facilities_detail, food_beverage_area,
                 CASE WHEN w.stay_seq IS NOT NULL AND w.state = 'Y' THEN True ELSE False END AS wish_state,
-                rs.review_count, rs.review_score_average
+                rs.review_count, rs.review_score_average, ri.room_image_url_list
             FROM public.stay_info si
             LEFT JOIN public.wish w ON si.stay_seq = w.stay_seq and w.user_seq = {user_seq}
             JOIN review_stat rs ON si.stay_seq = rs.stay_seq
+            JOIN room_image ri ON si.stay_seq = ri.stay_seq
             WHERE si.stay_seq = {stay_seq}
             ;
             """))
@@ -122,7 +134,7 @@ async def get_stay_info_by_stay_seq(user_seq: int, stay_seq: int) -> StayInfoWis
             result = await session.execute(get_stay_info_with_wish_review_query)
 
             result_model = result.mappings().fetchone()
-            stay_info_wish_review = StayInfoWishReviewModel(**result_model)
+            stay_info_wish_review = convert_stay_info_model_to_response(StayInfoWishReviewModel(**result_model))
             return stay_info_wish_review
 
         except Exception as e:
