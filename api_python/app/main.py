@@ -13,6 +13,7 @@ from api_python.app.security.cors import allow_origins
 from api_python.app.stay.stay_router import stay_router
 from api_python.app.wish.wish_router import wish_router
 from api_python.app.user.user_router import user_router
+from api_python.app.point.point_router import point_router 
 
 import random
 import string
@@ -52,12 +53,14 @@ if IS_PROD:
     app.include_router(wish_router)
     app.include_router(room_router)
     app.include_router(review_router)
+    app.include_router(point_router)
 else:
     app.include_router(user_router, prefix="/api")
     app.include_router(stay_router, prefix="/api")
     app.include_router(wish_router, prefix="/api")
     app.include_router(room_router, prefix="/api")
     app.include_router(review_router, prefix="/api")
+    app.include_router(point_router, prefix="/api")
 # app.include_router(auth_router)
 # app.include_router(user_router)
 

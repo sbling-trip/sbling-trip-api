@@ -17,7 +17,7 @@ async def update_user(
     location_agree: bool | None,
     marketing_agree: bool | None,
 ) -> bool:
-    user = await find_by_user_seq(user_seq)
+    user = await find_by_user_seq_user_model(user_seq)
     async with postgres_client.session() as session:
         try:
             async with session.begin():
@@ -43,7 +43,7 @@ async def update_user(
             raise update_user_exception(str(e))
 
 
-async def find_by_user_seq(user_seq: int) -> UserModel:
+async def find_by_user_seq_user_model(user_seq: int) -> UserModel:
     async with postgres_client.session() as session:
         try:
             get_user_me = text(
@@ -59,8 +59,8 @@ async def find_by_user_seq(user_seq: int) -> UserModel:
             result = await session.execute(get_user_me)
 
             result_model = result.mappings().fetchone()
-            stay_info_wish_review = UserModel(**result_model)
-            return stay_info_wish_review
+            user = UserModel(**result_model)
+            return user
 
         except Exception as e:
             raise get_user_exception(str(e))

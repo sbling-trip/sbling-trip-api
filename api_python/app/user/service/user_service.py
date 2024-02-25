@@ -8,7 +8,7 @@ from api_python.app.security.service.security_service import (
     decode_token,
 )
 from api_python.app.user.model.user_model import UserModel
-from api_python.app.user.repository.user_repository import find_by_user_seq, update_user
+from api_python.app.user.repository.user_repository import find_by_user_seq_user_model, update_user
 
 
 def get_user_seq_by_token(token: str, non_login_available: bool = False) -> int:
@@ -37,7 +37,7 @@ def get_user_seq_by_authorization_optional(
 async def get_user_info_service(
     user_seq: int,
 ) -> UserModel:
-    return await find_by_user_seq(
+    return await find_by_user_seq_user_model(
         user_seq=user_seq,
     )
 
