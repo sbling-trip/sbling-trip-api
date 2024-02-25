@@ -7,6 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from api_python.app.common.client.resources import async_resource_list
 from api_python.app.common.config.phase import IS_PROD
+from api_python.app.reservation.reservation_router import reservation_router
 from api_python.app.review.review_router import review_router
 from api_python.app.room.room_router import room_router
 from api_python.app.security.cors import allow_origins
@@ -54,6 +55,7 @@ if IS_PROD:
     app.include_router(room_router)
     app.include_router(review_router)
     app.include_router(point_router)
+    app.include_router(reservation_router)
 else:
     app.include_router(user_router, prefix="/api")
     app.include_router(stay_router, prefix="/api")
@@ -61,9 +63,7 @@ else:
     app.include_router(room_router, prefix="/api")
     app.include_router(review_router, prefix="/api")
     app.include_router(point_router, prefix="/api")
-# app.include_router(auth_router)
-# app.include_router(user_router)
-
+    app.include_router(reservation_router, prefix="/api")
 
 @app.get("/actuator/health")
 def health_check():

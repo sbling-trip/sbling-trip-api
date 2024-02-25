@@ -1,10 +1,12 @@
 # https://docs.pydantic.dev/2.5/concepts/models/#arbitrary-class-instances
 from datetime import time
+from typing import List
 
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from sqlalchemy import Column, BigInteger, Boolean, TEXT, TIME, INTEGER, NUMERIC, VARCHAR
 
+from api_python.app.common.pydantic_validator import str_to_list
 from api_python.app.common.sql_alchemy import Base
 
 
@@ -142,3 +144,54 @@ class StayInfoWishReviewModel(BaseModel):
     wish_state: bool = False
     review_count: int = 0
     review_score_average: float = 0.0
+    room_image_url_list: str | None = None
+
+
+class UserResponseStayInfoModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+
+    stay_seq: int
+    stay_name: str | None = None
+    manager: str | None = None
+    contact_number: str | None = None
+    address: str | None = None
+    check_in_time: str | None = None
+    check_out_time: str | None = None
+    description: str | None = None
+    refund_policy: str | None = None
+    homepage_url: str | None = None
+    reservation_info: str | None = None
+    parking_available: bool | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    facilities_detail: str | None = None
+    food_beverage_area: str | None = None
+    wish_state: bool = False
+    review_count: int = 0
+    review_score_average: float = 0.0
+    room_image_url_list: List[str] | None = None
+
+
+def convert_stay_info_model_to_response(stay: StayInfoWishReviewModel) -> UserResponseStayInfoModel:
+    return UserResponseStayInfoModel(
+        stay_seq=stay.stay_seq,
+        stay_name=stay.stay_name,
+        manager=stay.manager,
+        contact_number=stay.contact_number,
+        address=stay.address,
+        check_in_time=stay.check_in_time,
+        check_out_time=stay.check_out_time,
+        description=stay.description,
+        refund_policy=stay.refund_policy,
+        homepage_url=stay.homepage_url,
+        reservation_info=stay.reservation_info,
+        parking_available=stay.parking_available,
+        latitude=stay.latitude,
+        longitude=stay.longitude,
+        facilities_detail=stay.facilities_detail,
+        food_beverage_area=stay.food_beverage_area,
+        wish_state=stay.wish_state,
+        review_count=stay.review_count,
+        review_score_average=stay.review_score_average,
+        room_image_url_list=str_to_list(stay.room_image_url_list)
+    )

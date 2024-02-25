@@ -97,15 +97,16 @@ def update_user_exception(error_message: str) -> HTTPException:
         detail="Failed to update user(유저 업데이트에 실패했습니다.): " + error_message,
     )
 
-def get_point_exception(error_message: str) -> HTTPException:
-    return HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Failed to get point(포인트 조회에 실패했습니다.): " + error_message,
-    )
-
 
 def update_point_exception(error_message: str) -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Failed to update point(포인트 업데이트에 실패했습니다.): " + error_message,
+    )
+
+
+def get_reservation_count_exception(error_message: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to get reservation count(예약 수 조회에 실패했습니다.): " + error_message,
     )

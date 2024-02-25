@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from sqlalchemy import Column, BigInteger, VARCHAR, Integer
 
+from api_python.app.common.pydantic_validator import str_to_list
 from api_python.app.common.sql_alchemy import Base
 
 import json
@@ -74,13 +75,6 @@ class UserResponseRoomModel(BaseModel):
     max_people: int
     additional_charge: int
     child_additional_charge: int
-
-
-def str_to_list(string: str) -> List[str]:
-    try:
-        return json.loads(string.replace("'", '"'))
-    except json.JSONDecodeError:
-        return string.split(', ')
 
 
 def convert_room_model_to_response(room_model: RoomModel) -> UserResponseRoomModel:
