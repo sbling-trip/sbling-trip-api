@@ -1,18 +1,20 @@
-from typing import List
+from typing import List, Tuple
 
 from api_python.app.review.model.review_model import UserResponseReviewModel
-from api_python.app.review.repository.review_repository import get_stay_review_limit_offset, add_review, update_review, \
-    remove_review
+from api_python.app.review.repository.review_repository import get_stay_review_limit_offset, add_review, \
+    update_review, remove_review, get_total_review_count_by_stay_seq
 
 LIMIT_COUNT = 10
 
 
-async def get_review_info_by_stay_seq_service(stay_seq: int, cursor: int) -> List[UserResponseReviewModel]:
-    return await get_stay_review_limit_offset(
+async def get_review_info_by_stay_seq_service(stay_seq: int, cursor: int) -> Tuple[List[UserResponseReviewModel], int]:
+    stay_review_info = await get_stay_review_limit_offset(
         stay_seq=stay_seq,
         offset=cursor*LIMIT_COUNT,
         limit=LIMIT_COUNT
     )
+    total_review_count = await get_total_review_count_by_stay_seq(stay_seq)
+    return stay_review_info, total_review_count
 
 
 async def add_review_info_service(

@@ -45,6 +45,7 @@ class ReviewModel(BaseModel):
     review_content: str
     review_score: int
     review_image_url_list: str
+    created_at: datetime
     modified_at: datetime
 
 
@@ -59,7 +60,8 @@ class UserResponseReviewModel(BaseModel):
     review_content: str
     review_score: int
     review_image_url_list: List[str]
-    modified_at: str
+    created_at: datetime
+    modified_at: datetime
 
 
 def str_to_list(string: str) -> List[str]:
@@ -79,5 +81,6 @@ def convert_review_model_to_response(review: ReviewModel) -> UserResponseReviewM
         review_content=review.review_content,
         review_score=review.review_score,
         review_image_url_list=str_to_list(review.review_image_url_list),
-        modified_at=review.modified_at.strftime('%Y.%m.%d')
+        created_at=review.created_at,
+        modified_at=review.modified_at
     )

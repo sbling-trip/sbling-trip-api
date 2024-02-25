@@ -26,6 +26,10 @@ class RoomOrm(Base):
     toilet_option = Column(VARCHAR(255), nullable=True)
     room_option = Column(VARCHAR(255), nullable=True)
     special_room_option = Column(VARCHAR(255), nullable=True)
+    min_people = Column(Integer, nullable=False)
+    max_people = Column(Integer, nullable=False)
+    additional_charge = Column(Integer, nullable=False)
+    child_additional_charge = Column(Integer, nullable=False)
 
 
 class RoomModel(BaseModel):
@@ -44,6 +48,10 @@ class RoomModel(BaseModel):
     toilet_option: str
     room_option: str
     special_room_option: str
+    min_people: int
+    max_people: int
+    additional_charge: int
+    child_additional_charge: int
 
 
 class UserResponseRoomModel(BaseModel):
@@ -62,6 +70,10 @@ class UserResponseRoomModel(BaseModel):
     toilet_option: list[str]
     room_option: list[str]
     special_room_option: list[str]
+    min_people: int
+    max_people: int
+    additional_charge: int
+    child_additional_charge: int
 
 
 def str_to_list(string: str) -> List[str]:
@@ -86,6 +98,10 @@ def convert_room_model_to_response(room_model: RoomModel) -> UserResponseRoomMod
         toilet_option=str_to_list(room_model.toilet_option),
         room_option=str_to_list(room_model.room_option),
         special_room_option=str_to_list(room_model.special_room_option),
+        min_people=room_model.min_people,
+        max_people=room_model.max_people,
+        additional_charge=room_model.additional_charge,
+        child_additional_charge=room_model.child_additional_charge
     )
 
 

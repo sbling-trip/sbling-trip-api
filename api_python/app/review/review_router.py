@@ -1,14 +1,13 @@
-from typing import Annotated
+from typing import Annotated, Dict, Any
 
 from fastapi import APIRouter, Query
 
 from api_python.app.common.api_response import ApiResponse
 from api_python.app.common.config.phase import IS_LOCAL
 from api_python.app.common.depends.depends import user_seq_dependency_optional, user_seq_dependency
-from api_python.app.review.model.review_model import UserResponseReviewModel
 from api_python.app.review.service.review_service import get_review_info_by_stay_seq_service, add_review_info_service, \
     update_review_info_service, remove_review_service
-
+ResponsePayload = Dict[str, Any]
 review_router = APIRouter(
     prefix="/review",
 )
@@ -23,9 +22,15 @@ review_router = APIRouter(
 async def get_review_info(
         stay_seq: Annotated[int, Query(alias="staySeq", description="숙소 seq", ge=1)],
         cursor: Annotated[int, Query(description="id 참조 지점", ge=0)] = 0
-) -> ApiResponse[list[UserResponseReviewModel]]:
-    result = await get_review_info_by_stay_seq_service(stay_seq, cursor)
-    return ApiResponse.success(result)
+) -> ApiResponse[ResponsePayload]:
+    user_response_review_model, total_review_count = await get_review_info_by_stay_seq_service(stay_seq, cursor)
+    result = {
+        "payload": user_response_review_model,
+        "meta": {
+            "totalReviewCount": total_review_count
+        }
+    }
+    return ApiResponse.success(result=result)
 
 
 @review_router.post(

@@ -21,11 +21,11 @@ async def get_stay_review_limit_offset(
             get_stay_review_query = text(dedent(f"""
             SELECT 
                 review_seq, user_seq, r.room_seq, room_name, review_title,
-                review_content, review_score, review_image_url_list, modified_at
+                review_content, review_score, review_image_url_list, created_at, modified_at
             FROM public.review r
             JOIN room_info ri ON r.room_seq = ri.room_seq AND r.stay_seq = {stay_seq}
             WHERE exposed = true
-            ORDER BY modified_at DESC, review_seq DESC
+            ORDER BY created_at DESC, review_seq DESC
             LIMIT {limit} OFFSET {offset}
             ;   
             """))
@@ -37,6 +37,24 @@ async def get_stay_review_limit_offset(
 
         except Exception as e:
             raise get_review_exception(str(e))
+
+
+async def get_total_review_count_by_stay_seq(stay_seq: int) -> int:
+    async with postgres_client.session() as session:
+        try:
+            get_total_review_count_query = text(dedent(f"""
+            SELECT COUNT(*) AS total_review_count
+            FROM public.review
+            WHERE stay_seq = {stay_seq} AND exposed = true
+            GROUP BY stay_seq
+            """))
+
+            result = await session.execute(get_total_review_count_query)
+            total_review_count = result.scalar()
+            return total_review_count
+        except Exception as e:
+            raise get_review_exception(str(e))
+
 
 
 async def add_review(
