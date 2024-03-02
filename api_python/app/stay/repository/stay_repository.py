@@ -17,6 +17,7 @@ def stay_sql_query_generator(
         adult_guest_count: int,
         child_guest_count: int,
         stay_seq: int | None = None,
+        stay_type: int | None = None,
 ) -> TextClause:
     stay_sql = text(dedent(f"""
         WITH review_stat AS (
@@ -42,7 +43,8 @@ def stay_sql_query_generator(
                     SELECT MIN(room_price + additional_charge * {adult_guest_count} + child_additional_charge * {child_guest_count})
                     FROM room_info ri2
                     WHERE ri2.stay_seq = si.stay_seq
-                )
+                ) 
+                {f"AND ri.stay_type = {stay_type}" if stay_type else ""}
         )
         SELECT
             si.stay_seq AS stay_seq, stay_name, manager, contact_number, address,
@@ -55,7 +57,8 @@ def stay_sql_query_generator(
         LEFT JOIN public.wish w ON si.stay_seq = w.stay_seq AND w.user_seq = {user_seq}
         JOIN review_stat rs ON si.stay_seq = rs.stay_seq
         JOIN room_data rd ON si.stay_seq = rd.stay_seq
-        {f"WHERE si.stay_seq = {stay_seq}" if stay_seq else ""}
+        WHERE 1 = 1
+        {f"AND si.stay_seq = {stay_seq}" if stay_seq else ""}
         ORDER BY si.stay_seq
         LIMIT {limit} OFFSET {offset}
         ;
@@ -97,7 +100,8 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
         offset: int,
         limit: int,
         adult_guest_count: int = 0,
-        child_guest_count: int = 0
+        child_guest_count: int = 0,
+        stay_type: int | None = None
 ) -> list[UserResponseStayInfoModel]:
     async with postgres_client.session() as session:
         try:
@@ -107,7 +111,8 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
                 limit=limit,
                 adult_guest_count=adult_guest_count,
                 child_guest_count=child_guest_count,
-                stay_seq=None
+                stay_seq=None,
+                stay_type=stay_type
             )
 
             result = await session.execute(get_stay_info_with_wish_review_query)

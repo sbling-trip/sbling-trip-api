@@ -43,3 +43,17 @@ async def get_stay_info_service(
         user_seq=user_seq,
         stay_seq=stay_seq
     )
+
+
+async def get_stay_wish_review_list_by_stay_type_service(
+        user_seq: int,
+        stay_type: int,
+        cursor: int
+) -> list[UserResponseStayInfoModel]:
+    result = await get_stay_info_with_review_for_user_seq_limit_offset(
+        user_seq=user_seq,
+        offset=cursor*LIMIT_COUNT,
+        limit=LIMIT_COUNT,
+        stay_type=stay_type
+    )
+    return result
