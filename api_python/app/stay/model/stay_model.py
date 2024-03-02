@@ -145,6 +145,7 @@ class StayInfoWishReviewModel(BaseModel):
     review_count: int = 0
     review_score_average: float = 0.0
     room_image_url_list: str | None = None
+    minimum_room_price: int | None = None
 
 
 class UserResponseStayInfoModel(BaseModel):
@@ -160,7 +161,6 @@ class UserResponseStayInfoModel(BaseModel):
     description: str | None = None
     refund_policy: str | None = None
     homepage_url: str | None = None
-    reservation_info: str | None = None
     parking_available: bool | None = None
     latitude: float | None = None
     longitude: float | None = None
@@ -170,6 +170,7 @@ class UserResponseStayInfoModel(BaseModel):
     review_count: int = 0
     review_score_average: float = 0.0
     room_image_url_list: List[str] | None = None
+    minimum_room_price: int | None = None
 
 
 def convert_stay_info_model_to_response(stay: StayInfoWishReviewModel) -> UserResponseStayInfoModel:
@@ -184,7 +185,6 @@ def convert_stay_info_model_to_response(stay: StayInfoWishReviewModel) -> UserRe
         description=stay.description,
         refund_policy=stay.refund_policy,
         homepage_url=stay.homepage_url,
-        reservation_info=stay.reservation_info,
         parking_available=stay.parking_available,
         latitude=stay.latitude,
         longitude=stay.longitude,
@@ -193,5 +193,6 @@ def convert_stay_info_model_to_response(stay: StayInfoWishReviewModel) -> UserRe
         wish_state=stay.wish_state,
         review_count=stay.review_count,
         review_score_average=stay.review_score_average,
-        room_image_url_list=str_to_list(stay.room_image_url_list)
+        room_image_url_list=str_to_list(stay.room_image_url_list),
+        minimum_room_price=stay.minimum_room_price
     )

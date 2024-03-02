@@ -25,3 +25,26 @@ async def get_reservation_count_by_room_seq(room_seq: int, check_in_date: dateti
             return reservation_count if reservation_count else 0
         except Exception as e:
             raise get_reservation_count_exception(str(e))
+
+
+async def get_reservation_stay_repository(
+        check_in_date: datetime.date,
+        check_out_date: datetime.date,
+        adult_guest_count: int,
+        child_guest_count: int
+) -> int:
+    async with postgres_client.session() as session:
+        try:
+            get_reservation_stay_query = text(dedent(f"""
+            SELECT COUNT(*) AS available_room_count
+            FROM public.reservations
+            WHERE
+            (check_in_date >= '{check_in_date}' AND check_in_date < '{check_out_date}') OR
+            (check_out_date > '{check_in_date}' AND check_out_date <= '{check_out_date}')
+            """))
+            result = await session.execute(get_reservation_stay_query)
+            available_room_count = result.scalar()
+            return available_room_count
+        except Exception as e:
+            raise get_reservation_count_exception(str(e))
+    return 1
