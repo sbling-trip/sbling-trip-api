@@ -3,9 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from api_python.app.common.api_response import ApiResponse
-from api_python.app.common.depends.depends import user_seq_dependency
-from api_python.app.stay.model.stay_model import StayInfoWishModel
-from api_python.app.wish.repository.wish_repository import update_by_user_seq_stay_seq
+from api_python.app.common.config.phase import IS_LOCAL
+from api_python.app.common.depends.depends import user_seq_dependency, user_seq_dependency_optional
+from api_python.app.stay.model.stay_model import UserResponseStayInfoModel
 from api_python.app.wish.service.wish_service import add_stay_wish_service, get_stay_wish_list_service, \
     remove_stay_wish_service
 
@@ -21,9 +21,9 @@ wish_router = APIRouter(
     tags=["찜"],
 )
 async def get_stay_wish_list(
-        user_seq: Annotated[int, user_seq_dependency],
+        user_seq: Annotated[int, user_seq_dependency_optional if IS_LOCAL else user_seq_dependency],
         cursor: Annotated[int, Query(description="id 참조 지점", ge=0)] = 0,
-) -> ApiResponse[list[StayInfoWishModel]]:
+) -> ApiResponse[list[UserResponseStayInfoModel]]:
     result = await get_stay_wish_list_service(cursor=cursor, user_seq=user_seq)
     return ApiResponse.success(result)
 

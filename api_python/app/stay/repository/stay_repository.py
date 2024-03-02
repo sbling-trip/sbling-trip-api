@@ -14,8 +14,8 @@ def stay_sql_query_generator(
         user_seq: int,
         offset: int,
         limit: int,
-        adult_guest_count: int,
-        child_guest_count: int,
+        adult_guest_count: int = 0,
+        child_guest_count: int = 0,
         stay_seq: int | None = None,
         stay_type: int | None = None,
 ) -> TextClause:
