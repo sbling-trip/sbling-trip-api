@@ -112,8 +112,8 @@ def update_point_exception(error_message: str) -> HTTPException:
     )
 
 
-def get_reservation_count_exception(error_message: str) -> HTTPException:
+def get_reservation_available_stay_exception(error_message: str) -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Failed to get reservation count(예약 수 조회에 실패했습니다.): " + error_message,
+        detail="Failed to get reservation available stay(예약 가능 숙소 조회에 실패했습니다.): " + error_message
     )
