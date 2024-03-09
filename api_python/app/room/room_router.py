@@ -30,7 +30,7 @@ async def get_room_info(
     "/info/available",
     summary="예약 가능 객실 정보 조회",
     description="예약 가능한 객실 정보를 조회 합니다. stay_seq를 통해 조회 합니다.",
-    tags=["객실"],
+    tags=["예약"],
 )
 async def get_available_room_info(
         stay_seq: Annotated[int, Query(alias="staySeq", description="숙소 seq", ge=1)],

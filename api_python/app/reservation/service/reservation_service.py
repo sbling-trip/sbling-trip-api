@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import List
 
-from api_python.app.reservation.repository.reservation_repository import get_reservation_stay_repository
+from api_python.app.reservation.model.reservation_model import UserResponseReservationInfoModel
+from api_python.app.reservation.repository.reservation_repository import get_reservation_stay_repository, \
+    get_reservation_room_list
 from api_python.app.stay.model.stay_model import UserResponseStayInfoModel
 
 LIMIT_COUNT = 20
@@ -28,3 +30,13 @@ async def get_reservation_available_stay_service(
     )
     return result
 
+
+async def get_reservation_room_list_service(
+        user_seq: int,
+        reservation_status: list[str]
+) -> List[UserResponseReservationInfoModel]:
+    result = await get_reservation_room_list(
+        user_seq=user_seq,
+        reservation_status=reservation_status
+    )
+    return result

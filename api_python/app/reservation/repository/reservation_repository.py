@@ -5,6 +5,7 @@ from api_python.app.common.client.postgres.postgres_client import postgres_clien
 from sqlalchemy import text, TextClause
 
 from api_python.app.common.exceptions import get_reservation_available_stay_exception
+from api_python.app.reservation.model.reservation_model import UserResponseReservationInfoModel
 from api_python.app.stay.model.stay_model import UserResponseStayInfoModel, convert_stay_info_model_to_response, \
     StayInfoWishReviewModel
 
@@ -33,8 +34,9 @@ def reservation_stay_sql_generator(
         pre_reservation_count AS(
             SELECT r.room_seq, COUNT(*) AS reservation_count FROM available_room_info ari
             JOIN public.reservations r ON ari.room_seq = r.room_seq
-            WHERE (r.check_in_date >= '{check_in_date}' AND r.check_in_date < '{check_out_date}') OR
-                  (r.check_out_date > '{check_in_date}' AND r.check_out_date <= '{check_out_date}')
+            WHERE ((r.check_in_date >= '{check_in_date}' AND r.check_in_date < '{check_out_date}') OR
+                  (r.check_out_date > '{check_in_date}' AND r.check_out_date <= '{check_out_date}'))
+                  AND r.reservation_status != 'cancelled'
             GROUP BY r.room_seq
         ),
         available_room_data AS (
@@ -55,7 +57,14 @@ def reservation_stay_sql_generator(
             SELECT
                 si.stay_seq,
                 ri.room_image_url_list,
-                room_price + additional_charge * {adult_guest_count} + child_additional_charge * {child_guest_count} AS minimum_room_price
+                (ri.room_price +
+                    CASE
+                      WHEN ({adult_guest_count} - ri.min_people) >= 0 THEN
+                        ({adult_guest_count} - ri.min_people) * ri.additional_charge + {child_guest_count} * ri.child_additional_charge
+                      ELSE
+                        ({child_guest_count} + {adult_guest_count} - ri.min_people) * ri.child_additional_charge
+                    END) 
+                    AS minimum_room_price
             FROM
                 stay_info si
             JOIN
@@ -65,9 +74,15 @@ def reservation_stay_sql_generator(
             WHERE
                 ri.room_seq = (
                     SELECT room_seq
-                    FROM room_info
+                    FROM room_info ri
                     WHERE stay_seq = si.stay_seq
-                    ORDER BY room_price + additional_charge * {adult_guest_count} + child_additional_charge * {child_guest_count}
+                    ORDER BY ri.room_price +
+                    CASE
+                      WHEN ({adult_guest_count} - ri.min_people) >= 0 THEN
+                        ({adult_guest_count} - ri.min_people) * ri.additional_charge + {child_guest_count} * ri.child_additional_charge
+                      ELSE
+                        ({child_guest_count} + {adult_guest_count} - ri.min_people) * ri.child_additional_charge
+                    END
                     LIMIT 1
                 )
         )
@@ -115,5 +130,34 @@ async def get_reservation_stay_repository(
             stay_model_list = [convert_stay_info_model_to_response(StayInfoWishReviewModel(**row))
                                for row in result.mappings().all()]
             return stay_model_list
+        except Exception as e:
+            raise get_reservation_available_stay_exception(str(e))
+
+
+async def get_reservation_room_list(
+        user_seq: int,
+        reservation_status: list[str]
+) -> list[UserResponseReservationInfoModel]:
+    async with postgres_client.session() as session:
+        try:
+            get_reservation_room_list_query = text(dedent(f"""
+                SELECT 
+                    reservation_seq,
+                    stay_seq,
+                    room_seq,
+                    check_in_date,
+                    check_out_date,
+                    adult_guest_count,
+                    child_guest_count,
+                    reservation_status,
+                    booking_date,
+                    payment_status,
+                    special_requests
+                FROM reservations
+                WHERE reservation_status IN (f{', '.join(reservation_status)}) AND user_seq = {user_seq}
+            """))
+            result = await session.execute(get_reservation_room_list_query)
+            room_list = [UserResponseReservationInfoModel(**row) for row in result.mappings().all()]
+            return room_list
         except Exception as e:
             raise get_reservation_available_stay_exception(str(e))

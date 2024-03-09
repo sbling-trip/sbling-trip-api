@@ -6,8 +6,8 @@ from sqlalchemy import select, ChunkedIteratorResult, TextClause, text
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
 from api_python.app.common.exceptions import get_room_info_exception
-from api_python.app.room.model.room_model import RoomOrm, RoomModel, convert_room_model_to_response, \
-    UserResponseRoomModel, UserAvailableRoomModel, convert_available_room_model_to_response, \
+from api_python.app.room.model.room_model import RoomOrm, RoomModel, \
+    UserAvailableRoomModel, convert_available_room_model_to_response, \
     UserResponseAvailableRoomModel
 
 
@@ -21,35 +21,41 @@ def reservation_room_sql_generator(
     return text(dedent(f"""
         WITH available_room_info AS (
              SELECT 
-                room_seq,
-                stay_seq,
-                stay_name,
-                stay_type,
-                room_name,
-                room_type,
-                room_price + additional_charge * {adult_guest_count} + child_additional_charge * {child_guest_count} AS room_price,
-                room_available_count,
-                room_image_url_list,
-                ott_service,
-                toilet_option,
-                room_option,
-                special_room_option,
-                min_people,
-                max_people,
-                additional_charge,
-                child_discount_price,
-                child_additional_charge
-             FROM room_info
+                ri.room_seq,
+                ri.stay_seq,
+                ri.stay_name,
+                ri.stay_type,
+                ri.room_name,
+                ri.room_type,
+                ri.room_price + CASE
+                      WHEN ({adult_guest_count} - ri.min_people) >= 0 THEN
+                        ({adult_guest_count} - ri.min_people) * ri.additional_charge + {child_guest_count} * ri.child_additional_charge
+                      ELSE
+                        ({child_guest_count} + {adult_guest_count} - ri.min_people) * ri.child_additional_charge
+                    END AS room_price,
+                ri.room_available_count,
+                ri.room_image_url_list,
+                ri.ott_service,
+                ri.toilet_option,
+                ri.room_option,
+                ri.special_room_option,
+                ri.min_people,
+                ri.max_people,
+                ri.additional_charge,
+                ri.child_discount_price,
+                ri.child_additional_charge
+             FROM room_info ri
              WHERE 
              min_people <= {adult_guest_count + child_guest_count}
              AND max_people >= {adult_guest_count + child_guest_count}
-             {f"AND stay_seq = {stay_seq}" if stay_seq else ""}
+             {f"AND ri.stay_seq = {stay_seq}" if stay_seq else ""}
          ),
         pre_reservation_count AS(
             SELECT r.room_seq, COUNT(*) AS reservation_count FROM available_room_info ari
             JOIN public.reservations r ON ari.room_seq = r.room_seq
-            WHERE (r.check_in_date >= '{check_in_date}' AND r.check_in_date < '{check_out_date}') OR
-                  (r.check_out_date > '{check_in_date}' AND r.check_out_date <= '{check_out_date}')
+            WHERE ((r.check_in_date >= '{check_in_date}' AND r.check_in_date < '{check_out_date}') OR
+                  (r.check_out_date > '{check_in_date}' AND r.check_out_date <= '{check_out_date}'))
+                  AND r.reservation_status != 'cancelled'
             GROUP BY r.room_seq
         ),
         available_room_data AS (
