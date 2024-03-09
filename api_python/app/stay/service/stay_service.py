@@ -43,3 +43,29 @@ async def get_stay_wish_review_list_by_stay_type_service(
         stay_type=stay_type
     )
     return result
+
+
+async def get_stay_wish_review_list_by_stay_type_order_by_rank_service(
+        user_seq: int,
+        stay_type: int,
+) -> list[UserResponseStayInfoModel]:
+    result = await get_stay_info_with_review_for_user_seq_limit_offset(
+        user_seq=user_seq,
+        limit=LIMIT_COUNT,
+        stay_type=stay_type,
+        order_by_list=["review_score_average", "review_count"]
+    )
+    return result
+
+
+async def get_stay_wish_review_list_by_stay_type_order_by_review_count_service(
+        user_seq: int,
+        stay_type: int,
+) -> list[UserResponseStayInfoModel]:
+    result = await get_stay_info_with_review_for_user_seq_limit_offset(
+        user_seq=user_seq,
+        limit=LIMIT_COUNT,
+        stay_type=stay_type,
+        order_by_list=["review_count", "review_score_average"]
+    )
+    return result

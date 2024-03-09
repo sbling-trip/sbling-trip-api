@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 from textwrap import dedent
 
 from sqlalchemy import select, ChunkedIteratorResult, TextClause
@@ -18,6 +18,7 @@ def stay_sql_query_generator(
         child_guest_count: int = 0,
         stay_seq: int | None = None,
         stay_type: int | None = None,
+        order_by_list: List[str] | None = None
 ) -> TextClause:
     stay_sql = text(dedent(f"""
         WITH review_stat AS (
@@ -59,7 +60,7 @@ def stay_sql_query_generator(
         JOIN room_data rd ON si.stay_seq = rd.stay_seq
         WHERE 1 = 1
         {f"AND si.stay_seq = {stay_seq}" if stay_seq else ""}
-        ORDER BY si.stay_seq
+        ORDER BY {f"si.stay_seq ASC" if order_by_list is None else f"{' DESC, '.join(order_by_list)} DESC"}
         LIMIT {limit} OFFSET {offset}
         ;
         """))
@@ -97,23 +98,21 @@ async def find_by_seq_limit_offset(offset: int, limit: int) -> list[StayInfoMode
 
 async def get_stay_info_with_review_for_user_seq_limit_offset(
         user_seq: int,
-        offset: int,
-        limit: int,
+        offset: int = 0,
+        limit: int = 20,
         adult_guest_count: int = 0,
         child_guest_count: int = 0,
-        stay_type: int | None = None
+        stay_type: int | None = None,
+        order_by_list: List[str] | None = None
 ) -> list[UserResponseStayInfoModel]:
     async with postgres_client.session() as session:
         try:
-            get_stay_info_with_wish_review_query = stay_sql_query_generator(
-                user_seq=user_seq,
-                offset=offset,
-                limit=limit,
-                adult_guest_count=adult_guest_count,
-                child_guest_count=child_guest_count,
-                stay_seq=None,
-                stay_type=stay_type
-            )
+            get_stay_info_with_wish_review_query = stay_sql_query_generator(user_seq=user_seq, offset=offset,
+                                                                            limit=limit,
+                                                                            adult_guest_count=adult_guest_count,
+                                                                            child_guest_count=child_guest_count,
+                                                                            stay_seq=None, stay_type=stay_type,
+                                                                            order_by_list=order_by_list)
 
             result = await session.execute(get_stay_info_with_wish_review_query)
             stay_model_list = [convert_stay_info_model_to_response(StayInfoWishReviewModel(**row))
@@ -127,14 +126,9 @@ async def get_stay_info_with_review_for_user_seq_limit_offset(
 async def get_stay_info_by_stay_seq(user_seq: int, stay_seq: int) -> UserResponseStayInfoModel:
     async with postgres_client.session() as session:
         try:
-            get_stay_info_with_wish_review_query = stay_sql_query_generator(
-                user_seq=user_seq,
-                offset=0,
-                limit=1,
-                adult_guest_count=0,
-                child_guest_count=0,
-                stay_seq=stay_seq
-            )
+            get_stay_info_with_wish_review_query = stay_sql_query_generator(user_seq=user_seq, offset=0, limit=1,
+                                                                            adult_guest_count=0, child_guest_count=0,
+                                                                            stay_seq=stay_seq)
 
             result = await session.execute(get_stay_info_with_wish_review_query)
 
