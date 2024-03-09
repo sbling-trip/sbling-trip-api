@@ -7,7 +7,7 @@ from api_python.app.stay.model.stay_model import UserResponseStayInfoModel
 LIMIT_COUNT = 20
 
 
-async def get_reservation_stay_service(
+async def get_reservation_available_stay_service(
         user_seq: int,
         cursor: int,
         check_in_date: datetime.date,
@@ -27,3 +27,4 @@ async def get_reservation_stay_service(
         stay_type=stay_type
     )
     return result
+

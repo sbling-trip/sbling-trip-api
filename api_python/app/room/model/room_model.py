@@ -77,6 +77,46 @@ class UserResponseRoomModel(BaseModel):
     child_additional_charge: int
 
 
+class UserAvailableRoomModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+
+    room_seq: int
+    stay_seq: int
+    stay_name: str
+    stay_type: int
+    room_name: str
+    room_type: int
+    room_price: int
+    room_available_count: int
+    room_image_url_list: str
+    ott_service: str
+    toilet_option: str
+    room_option: str
+    special_room_option: str
+    adult_guest_count: int
+    child_guest_count: int
+
+
+class UserResponseAvailableRoomModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+
+    room_seq: int
+    stay_seq: int
+    stay_name: str
+    stay_type: int
+    room_name: str
+    room_type: int
+    room_price: int
+    room_available_count: int
+    room_image_url_list: list[str]
+    ott_service: list[str]
+    toilet_option: list[str]
+    room_option: list[str]
+    special_room_option: list[str]
+    adult_guest_count: int
+    child_guest_count: int
+
+
 def convert_room_model_to_response(room_model: RoomModel) -> UserResponseRoomModel:
     return UserResponseRoomModel(
         room_seq=room_model.room_seq,
@@ -98,4 +138,23 @@ def convert_room_model_to_response(room_model: RoomModel) -> UserResponseRoomMod
         child_additional_charge=room_model.child_additional_charge
     )
 
+
+def convert_available_room_model_to_response(room_model: UserAvailableRoomModel) -> UserResponseAvailableRoomModel:
+    return UserResponseAvailableRoomModel(
+        room_seq=room_model.room_seq,
+        stay_seq=room_model.stay_seq,
+        stay_name=room_model.stay_name,
+        stay_type=room_model.stay_type,
+        room_name=room_model.room_name,
+        room_type=room_model.room_type,
+        room_price=room_model.room_price,
+        room_available_count=room_model.room_available_count,
+        room_image_url_list=str_to_list(room_model.room_image_url_list),
+        ott_service=str_to_list(room_model.ott_service),
+        toilet_option=str_to_list(room_model.toilet_option),
+        room_option=str_to_list(room_model.room_option),
+        special_room_option=str_to_list(room_model.special_room_option),
+        adult_guest_count=room_model.adult_guest_count,
+        child_guest_count=room_model.child_guest_count
+    )
 

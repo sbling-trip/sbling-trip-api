@@ -1,3 +1,4 @@
+from datetime import datetime, date
 from typing import Annotated
 
 from fastapi import APIRouter, Query
@@ -6,7 +7,7 @@ from api_python.app.common.api_response import ApiResponse
 from api_python.app.common.config.phase import IS_LOCAL
 from api_python.app.common.depends.depends import user_seq_dependency_optional, user_seq_dependency
 from api_python.app.common.model.stay_type import StayType
-from api_python.app.reservation.service.reservation_service import get_reservation_stay_service
+from api_python.app.reservation.service.reservation_service import get_reservation_available_stay_service
 from api_python.app.stay.model.stay_model import UserResponseStayInfoModel
 from api_python.app.stay.service.stay_service import get_stay_info_service, \
     get_stay_wish_review_list_by_stay_type_service, get_stay_wish_review_list_by_stay_type_order_by_rank_service, \
@@ -95,14 +96,14 @@ async def get_stay_info(
 )
 async def get_reservation_stay(
         user_seq: Annotated[int, user_seq_dependency_optional if IS_LOCAL else user_seq_dependency],
-        check_in_date: Annotated[str, Query(alias="checkInDate", description="체크인 날짜")],
-        check_out_date: Annotated[str, Query(alias="checkOutDate", description="체크 아웃 날짜")],
+        check_in_date: Annotated[date, Query(alias="checkInDate", description="체크인 날짜")],
+        check_out_date: Annotated[date, Query(alias="checkOutDate", description="체크 아웃 날짜")],
         adult_guest_count: Annotated[int, Query(alias="adultGuestCount", description="성인 수")],
         child_guest_count: Annotated[int, Query(alias="childGuestCount", description="아동 수")],
         cursor: Annotated[int, Query(description="id 참조 지점", ge=0)] = 0,
         stay_type: Annotated[StayType | None, Query(alias="stayType", description="숙소 타입", ge=0, le=4)] = None
 ) -> ApiResponse[list[UserResponseStayInfoModel]]:
-    result = await get_reservation_stay_service(
+    result = await get_reservation_available_stay_service(
         user_seq=user_seq,
         check_in_date=check_in_date,
         check_out_date=check_out_date,

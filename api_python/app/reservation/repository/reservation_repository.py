@@ -38,8 +38,9 @@ def reservation_stay_sql_generator(
             GROUP BY r.room_seq
         ),
         available_room_data AS (
-        SELECT ari.room_seq, ari.stay_seq, GREATEST(ari.room_available_count - prc.reservation_count, 0) AS available_room_count
-        FROM available_room_info ari JOIN pre_reservation_count prc ON ari.room_seq = prc.room_seq
+        SELECT ari.room_seq, ari.stay_seq, GREATEST(ari.room_available_count - COALESCE(prc.reservation_count, 0), 0) AS available_room_count
+        FROM available_room_info ari 
+        LEFT JOIN pre_reservation_count prc ON ari.room_seq = prc.room_seq
         ),
         review_stat AS (
             SELECT 
