@@ -2,10 +2,13 @@ import datetime
 from textwrap import dedent
 
 from api_python.app.common.client.postgres.postgres_client import postgres_client
-from sqlalchemy import text, TextClause
+from sqlalchemy import text, TextClause, dialects
 
-from api_python.app.common.exceptions import get_reservation_available_stay_exception
-from api_python.app.reservation.model.reservation_model import UserResponseReservationInfoModel
+from api_python.app.common.exceptions import get_reservation_available_stay_exception, cancel_reservation_exception, \
+    get_reservation_available, update_reservation_exception, \
+    get_reservation_room_list_stay_exception
+from api_python.app.common.kst_time import get_kst_time_now
+from api_python.app.reservation.model.reservation_model import UserResponseReservationInfoModel, ReservationOrm
 from api_python.app.stay.model.stay_model import UserResponseStayInfoModel, convert_stay_info_model_to_response, \
     StayInfoWishReviewModel
 
@@ -140,24 +143,163 @@ async def get_reservation_room_list(
 ) -> list[UserResponseReservationInfoModel]:
     async with postgres_client.session() as session:
         try:
+            formatted_status = ', '.join(f"'{status}'" for status in reservation_status)
             get_reservation_room_list_query = text(dedent(f"""
                 SELECT 
-                    reservation_seq,
-                    stay_seq,
-                    room_seq,
-                    check_in_date,
-                    check_out_date,
-                    adult_guest_count,
-                    child_guest_count,
-                    reservation_status,
-                    booking_date,
-                    payment_status,
-                    special_requests
-                FROM reservations
-                WHERE reservation_status IN (f{', '.join(reservation_status)}) AND user_seq = {user_seq}
+                    r.reservation_seq,
+                    r.stay_seq,
+                    r.room_seq,
+                    ri.stay_name,
+                    ri.room_name,
+                    r.check_in_date,
+                    r.check_out_date,
+                    r.adult_guest_count,
+                    r.child_guest_count,
+                    r.reservation_status,
+                    r.booking_date,
+                    r.payment_status,
+                    r.special_requests,
+                    r.payment_price
+                FROM reservations r
+                JOIN room_info ri ON r.room_seq = ri.room_seq
+                WHERE reservation_status IN ({formatted_status}) AND user_seq = {user_seq}
             """))
             result = await session.execute(get_reservation_room_list_query)
             room_list = [UserResponseReservationInfoModel(**row) for row in result.mappings().all()]
             return room_list
         except Exception as e:
+            raise get_reservation_room_list_stay_exception(str(e))
+
+
+async def add_reservation_repository(
+        user_seq: int,
+        stay_seq: int,
+        room_seq: int,
+        check_in_date: datetime.date,
+        check_out_date: datetime.date,
+        adult_guest_count: int,
+        child_guest_count: int,
+        special_requests: str,
+        payment_price: int
+) -> bool:
+    async with postgres_client.session() as session:
+        try:
+            async with session.begin():
+                created_at = get_kst_time_now()
+                stmt = dialects.postgresql.insert(ReservationOrm).values(
+                    user_seq=user_seq,
+                    stay_seq=stay_seq,
+                    room_seq=room_seq,
+                    check_in_date=check_in_date,
+                    check_out_date=check_out_date,
+                    adult_guest_count=adult_guest_count,
+                    child_guest_count=child_guest_count,
+                    reservation_status='pending',
+                    booking_date=created_at,
+                    payment_status='unpaid',
+                    special_requests=special_requests,
+                    created_at=created_at,
+                    updated_at=created_at,
+                    payment_price=payment_price
+                )
+                await session.execute(stmt)
+                return True
+        except Exception as e:
             raise get_reservation_available_stay_exception(str(e))
+
+
+async def is_validate_stay_room_seq(
+        stay_seq: int,
+        room_seq: int
+) -> bool:
+    async with postgres_client.session() as session:
+        try:
+            stmt = text(dedent(f"""
+                SELECT COUNT(*) AS count
+                FROM room_info
+                WHERE stay_seq = {stay_seq} AND room_seq = {room_seq}
+            """))
+            result = await session.execute(stmt)
+            return result.scalar() > 0
+        except Exception as e:
+            raise get_reservation_available(str(e))
+
+
+async def is_reservation_available(
+        room_seq: int,
+        check_in_date: datetime.date,
+        check_out_date: datetime.date,
+        adult_guest_count: int,
+        child_guest_count: int,
+) -> bool:
+    async with postgres_client.session() as session:
+        try:
+            stmt = text(dedent(f"""
+            WITH available_room_info AS (
+                 SELECT room_seq
+                 FROM room_info
+                 WHERE 
+                 min_people <= {adult_guest_count + child_guest_count}
+                 AND max_people >= {adult_guest_count + child_guest_count}
+                 {f"AND room_seq = {room_seq}"}
+             ),
+            pre_reservation_count AS(
+                SELECT r.room_seq, COUNT(*) AS reservation_count FROM available_room_info ari
+                JOIN public.reservations r ON ari.room_seq = r.room_seq
+                WHERE ((r.check_in_date >= '{check_in_date}' AND r.check_in_date < '{check_out_date}') OR
+                      (r.check_out_date > '{check_in_date}' AND r.check_out_date <= '{check_out_date}'))
+                      AND r.reservation_status != 'cancelled'
+                WHERE r.room_seq = {room_seq}
+                GROUP BY r.room_seq
+            ),
+            available_room_data AS (
+                SELECT GREATEST(ari.room_available_count - COALESCE(prc.reservation_count, 0), 0) AS available_room_count
+                FROM available_room_info ari 
+                LEFT JOIN pre_reservation_count prc ON ari.room_seq = prc.room_seq
+            )
+            SELECT COUNT(*) AS count FROM available_room_data
+            WHERE available_room_count > 0
+            """))
+            result = await session.execute(stmt)
+            return result.scalar() > 0
+        except Exception as e:
+            raise get_reservation_available(str(e))
+
+
+async def update_reservation_payment(
+        reservation_seq: int
+) -> bool:
+    async with postgres_client.session() as session:
+        try:
+            async with session.begin():
+                stmt = dialects.postgresql.insert(ReservationOrm).values(
+                    reservation_seq=reservation_seq,
+                ).on_conflict_do_update(
+                    index_elements=['reservation_seq'],
+                    set_={'reservation_status': 'confirmed',
+                          'payment_status': 'paid',
+                          'updated_at': get_kst_time_now()}
+                )
+                await session.execute(stmt)
+                return True
+        except Exception as e:
+            raise update_reservation_exception(str(e))
+
+
+async def cancel_reservation(
+        reservation_seq: int
+) -> bool:
+    async with postgres_client.session() as session:
+        try:
+            async with session.begin():
+                stmt = dialects.postgresql.insert(ReservationOrm).values(
+                    reservation_seq=reservation_seq,
+                ).on_conflict_do_update(
+                    index_elements=['reservation_seq'],
+                    set_={'reservation_status': 'cancelled',
+                          'updated_at': get_kst_time_now()}
+                )
+                await session.execute(stmt)
+                return True
+        except Exception as e:
+            raise cancel_reservation_exception(str(e))

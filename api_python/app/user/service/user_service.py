@@ -45,9 +45,10 @@ def get_user_seq_by_authorization_optional(
 async def get_user_info_service(
     user_seq: int,
 ) -> UserModel:
-    return await find_by_user_seq_user_model(
+    result = await find_by_user_seq_user_model(
         user_seq=user_seq,
     )
+    return result
 
 
 async def update_user_info_service(

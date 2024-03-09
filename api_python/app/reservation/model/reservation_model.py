@@ -12,7 +12,7 @@ from typing import List
 from datetime import datetime
 
 
-class ReservationORM(Base):
+class ReservationOrm(Base):
     __tablename__ = 'reservations'
 
     reservation_seq = Column(BigInteger, primary_key=True)
@@ -29,6 +29,7 @@ class ReservationORM(Base):
     special_requests = Column(VARCHAR(255), nullable=True)
     created_at = Column(TIMESTAMP, nullable=False)
     updated_at = Column(TIMESTAMP, nullable=False)
+    payment_price = Column(BigInteger, nullable=False)
 
 
 class UserResponseReservationInfoModel(BaseModel):
@@ -37,14 +38,17 @@ class UserResponseReservationInfoModel(BaseModel):
     reservation_seq: int
     stay_seq: int
     room_seq: int
+    stay_name: str
+    room_name: str
     check_in_date: datetime
     check_out_date: datetime
     adult_guest_count: int
     child_guest_count: int
     reservation_status: str
     booking_date: datetime
-    payment_status: str
-    special_requests: str
+    payment_status: str | None
+    special_requests: str | None
+    payment_price: int
 
 
 

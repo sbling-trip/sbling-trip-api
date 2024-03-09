@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 
 from api_python.app.common.depends.depends import user_seq_dependency
 from api_python.app.common.api_response import ApiResponse
 from api_python.app.user.service.user_service import (
     get_user_info_service,
 )
-from api_python.app.user.model.user_model import UserUpdateModel
+from api_python.app.user.model.user_model import UserUpdateModel, UserModel
 from api_python.app.user.repository.user_repository import update_user
 
 user_router = APIRouter(
@@ -23,7 +23,7 @@ user_router = APIRouter(
 )
 async def get_user_info(
     user_seq: Annotated[int, user_seq_dependency],
-):
+) -> ApiResponse[UserModel]:
     result = await get_user_info_service(user_seq=user_seq)
     return ApiResponse.success(result)
 
@@ -36,7 +36,8 @@ async def get_user_info(
     tags=["유저"],
 )
 async def update_user_info(
-    user_seq: Annotated[int, user_seq_dependency], user: UserUpdateModel
+    user_seq: Annotated[int, user_seq_dependency],
+    user: UserUpdateModel
 ) -> ApiResponse[str]:
     await update_user(
         user_seq=user_seq,

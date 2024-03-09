@@ -25,13 +25,13 @@ async def update_user(
                     dedent(
                         f"""
                             UPDATE users 
-                            SET
-                            user_name = '{user.user_name if user_name == None else user_name}',
-                            location_agree = {user.location_agree if location_agree == None else location_agree},
-                            marketing_agree = {user.marketing_agree if marketing_agree == None else marketing_agree},
-                            updated_at = '{get_kst_time_now()}'
-                            WHERE
-                            user_seq = {user_seq};
+                                SET
+                                user_name = '{user.user_name if user_name == None else user_name}',
+                                location_agree = {user.location_agree if location_agree == None else location_agree},
+                                marketing_agree = {user.marketing_agree if marketing_agree == None else marketing_agree},
+                                updated_at = '{get_kst_time_now()}'
+                                WHERE
+                                user_seq = {user_seq};
                            """
                     )
                 )
@@ -49,9 +49,23 @@ async def find_by_user_seq_user_model(user_seq: int) -> UserModel:
             get_user_me = text(
                 dedent(
                     f"""
-                     SELECT *
+                     SELECT 
+                        users.user_seq,
+                        users.user_name,
+                        users.user_status,
+                        accounts.email AS user_email,
+                        users.gender,
+                        users.birth_at,
+                        users.created_at,
+                        users.updated_at,
+                        users.deleted_at,
+                        users.image,
+                        users.service_agree,
+                        users.location_agree,
+                        users.marketing_agree
                      FROM users
-                     WHERE user_seq = {user_seq};
+                     JOIN accounts ON users.user_seq = accounts.user_seq
+                     WHERE users.user_seq = {user_seq}
                      """
                 )
             )

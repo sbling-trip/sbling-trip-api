@@ -117,3 +117,45 @@ def get_reservation_available_stay_exception(error_message: str) -> HTTPExceptio
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         detail="Failed to get reservation available stay(예약 가능 숙소 조회에 실패했습니다.): " + error_message
     )
+
+
+def get_reservation_room_list_stay_exception(error_message: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to get reservation list stay(예약 목록 조회에 실패했습니다.): " + error_message
+    )
+
+
+def get_reservation_available_room_list_exception(error_message: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to get reservation room list(예약 가능 객실 조회에 실패했습니다.): " + error_message
+    )
+
+
+def get_reservation_available(exception_message: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to get reservation available(예약 가능 조회에 실패했습니다.): " + exception_message
+    )
+
+
+def cancel_reservation_exception(exception_message: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to delete reservation(예약 삭제에 실패했습니다.): " + exception_message
+    )
+
+
+def update_reservation_exception(exception_message: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to update reservation(예약 업데이트에 실패했습니다.): " + exception_message
+    )
+
+
+def get_validate_stay_room_seq_exception(exception_message: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to validate stay room seq(숙소 객실 seq 유효성 검사에 실패했습니다.): " + exception_message
+    )

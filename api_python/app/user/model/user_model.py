@@ -16,6 +16,7 @@ class UserModel(BaseModel):
     user_seq: int
     user_name: str
     user_status: int
+    user_email: str
     gender: str
     birth_at: datetime
     created_at: datetime
