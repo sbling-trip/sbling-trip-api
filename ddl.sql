@@ -165,6 +165,7 @@ CREATE TABLE IF NOT EXISTS "users"
     "user_seq"        SERIAL PRIMARY KEY         NOT NULL,
     "user_name"       VARCHAR(255) UNIQUE        NOT NULL,
     "user_email"      VARCHAR(255) UNIQUE        NOT NULL,
+    "user_status"     INT                        NULL
     "gender"          CHAR(1)                    NOT NULL,
     "birth_at"        TIMESTAMP(0)               NULL,
     "created_at"      TIMESTAMP(0) DEFAULT NOW() NOT NULL,
