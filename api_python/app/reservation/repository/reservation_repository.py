@@ -58,7 +58,7 @@ def reservation_stay_sql_generator(
         ),
         room_data AS (
             SELECT
-                si.stay_seq,
+                DISTINCT si.stay_seq,
                 ri.room_image_url_list,
                 (ri.room_price +
                     CASE
@@ -202,15 +202,7 @@ async def add_reservation_repository(
                     updated_at=request_timestamp,
                     payment_price=payment_price
                 ).on_conflict_do_update(
-                    index_elements=[
-                        "stay_seq",
-                        "room_seq",
-                        "user_seq",
-                        "check_in_date",
-                        "check_out_date",
-                        "adult_guest_count",
-                        "child_guest_count"
-                    ],
+                    index_elements=["reservation_seq"],
                     set_={"booking_date": request_timestamp}
                 )
                 await session.execute(stmt)
