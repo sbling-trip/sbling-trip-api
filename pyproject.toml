@@ -19,6 +19,7 @@ itsdangerous = "^2.1.2" # Required for SessionMiddleware support.
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 faker = "^22.2.0"
 python-multipart = "^0.0.7"
+backoff = "^2.2.1"
 
 
 

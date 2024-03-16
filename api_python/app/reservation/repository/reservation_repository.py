@@ -181,7 +181,7 @@ async def add_reservation_repository(
         child_guest_count: int,
         special_requests: str,
         payment_price: int
-) -> bool:
+) -> int:
     async with postgres_client.session() as session:
         try:
             async with session.begin():
@@ -204,9 +204,10 @@ async def add_reservation_repository(
                 ).on_conflict_do_update(
                     index_elements=["reservation_seq"],
                     set_={"booking_date": request_timestamp}
-                )
-                await session.execute(stmt)
-                return True
+                ).returning(ReservationOrm.reservation_seq)
+                result = await session.execute(stmt)
+                reservation_seq = result.fetchone()[0]
+                return reservation_seq
         except Exception as e:
             raise get_reservation_available_stay_exception(str(e))
 
@@ -300,9 +301,27 @@ async def cancel_reservation(
                 ).on_conflict_do_update(
                     index_elements=['reservation_seq'],
                     set_={'reservation_status': 'cancelled',
+                          'payment_status': 'unpaid',
                           'updated_at': get_kst_time_now()}
                 )
                 await session.execute(stmt)
                 return True
+        except Exception as e:
+            raise cancel_reservation_exception(str(e))
+
+
+async def get_reservation(
+        reservation_seq: int
+) -> UserResponseReservationInfoModel:
+    async with postgres_client.session() as session:
+        try:
+            stmt = text(dedent(f"""
+                SELECT * FROM reservations
+                WHERE reservation_seq = {reservation_seq}
+            """))
+            result = await session.execute(stmt)
+            result_model = result.mappings().fetchone()
+            reservation_model = UserResponseReservationInfoModel(**result_model)
+            return reservation_model
         except Exception as e:
             raise cancel_reservation_exception(str(e))

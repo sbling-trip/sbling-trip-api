@@ -51,5 +51,18 @@ class UserResponseReservationInfoModel(BaseModel):
     payment_price: int
 
 
+class ReservationRequestModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+    stay_seq: int
+    room_seq: int
+    check_in_date: datetime
+    check_out_date: datetime
+    adult_guest_count: int
+    child_guest_count: int
+    special_requests: str
+    payment_price: int
 
 
+class ReservationSeqModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+    reservation_seq: int

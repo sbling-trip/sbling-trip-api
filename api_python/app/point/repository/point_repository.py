@@ -12,7 +12,7 @@ from api_python.app.point.model.point_model import PointModel
 
 
 async def update_point(user_seq: int, point: int) -> bool:
-    point = await find_by_user_seq_point_model(user_seq)
+    point_model = await find_by_user_seq_point_model(user_seq)
     async with postgres_client.session() as session:
         try:
             async with session.begin():
@@ -21,7 +21,7 @@ async def update_point(user_seq: int, point: int) -> bool:
                         f"""
                             UPDATE points
                             SET
-                            point = {point.point + point},
+                            point = {point_model.point + point},
                             updated_at = '{get_kst_time_now()}'
                             WHERE
                             user_seq = {user_seq};
