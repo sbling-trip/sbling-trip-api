@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import List
 
-from api_python.app.common.exceptions import get_validate_stay_room_seq_exception
+from api_python.app.common.exceptions import get_validate_stay_room_seq_exception, get_validate_room_exception
 from api_python.app.reservation.model.reservation_model import UserResponseReservationInfoModel
 from api_python.app.reservation.repository.reservation_repository import get_reservation_stay_repository, \
-    get_reservation_room_list, add_reservation_repository, is_validate_stay_room_seq
+    get_reservation_room_list, add_reservation_repository, is_validate_stay_room_seq, is_reservation_available
 from api_python.app.stay.model.stay_model import UserResponseStayInfoModel
 
 LIMIT_COUNT = 20
@@ -59,8 +59,20 @@ async def add_reservation_service(
         room_seq=room_seq
     )
     if not validate_stay_room_seq:
-        raise get_validate_stay_room_seq_exception("올바르지 않은 숙소 또는 방입니다.")
-    result = await add_reservation_repository(
+        raise get_validate_stay_room_seq_exception("올바르지 않은 숙소 또는 방입니다. staySeq와 roomSeq를 확인해주세요.")
+
+    reservation_available = await is_reservation_available(
+        room_seq=room_seq,
+        check_in_date=check_in_date,
+        check_out_date=check_out_date,
+        adult_guest_count=adult_guest_count,
+        child_guest_count=child_guest_count
+    )
+
+    if not reservation_available:
+        raise get_validate_room_exception()
+
+    add_result = await add_reservation_repository(
         user_seq=user_seq,
         stay_seq=stay_seq,
         check_in_date=check_in_date,
@@ -70,3 +82,6 @@ async def add_reservation_service(
         special_requests=special_requests,
         payment_price=payment_price
     )
+
+    # TODO: 포인트 결제 API
+    return add_result

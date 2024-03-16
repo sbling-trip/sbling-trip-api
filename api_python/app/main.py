@@ -10,6 +10,7 @@ from api_python.app.common.config.phase import IS_PROD
 from api_python.app.reservation.reservation_router import reservation_router
 from api_python.app.review.review_router import review_router
 from api_python.app.room.room_router import room_router
+from api_python.app.search.search_router import search_router
 from api_python.app.security.cors import allow_origins
 from api_python.app.stay.stay_router import stay_router
 from api_python.app.wish.wish_router import wish_router
@@ -56,6 +57,7 @@ if IS_PROD:
     app.include_router(review_router)
     app.include_router(point_router)
     app.include_router(reservation_router)
+    app.include_router(search_router)
 else:
     app.include_router(user_router, prefix="/api")
     app.include_router(stay_router, prefix="/api")
@@ -64,6 +66,7 @@ else:
     app.include_router(review_router, prefix="/api")
     app.include_router(point_router, prefix="/api")
     app.include_router(reservation_router, prefix="/api")
+    app.include_router(search_router, prefix="/api")
 
 
 @app.get("/actuator/health")

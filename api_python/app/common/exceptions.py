@@ -159,3 +159,10 @@ def get_validate_stay_room_seq_exception(exception_message: str) -> HTTPExceptio
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         detail="Failed to validate stay room seq(숙소 객실 seq 유효성 검사에 실패했습니다.): " + exception_message
     )
+
+
+def get_validate_room_exception(exception_message: str = "") -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to validate room(객실 유효성 검사에 실패했습니다. 현재 예약이 불가능 합니다.): " + exception_message
+    )

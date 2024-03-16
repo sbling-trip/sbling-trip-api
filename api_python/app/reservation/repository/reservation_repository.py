@@ -33,7 +33,7 @@ def reservation_stay_sql_generator(
              AND max_people >= {adult_guest_count + child_guest_count}
              {f"AND stay_seq = {stay_seq}" if stay_seq else ""}
              {f"AND stay_type = {stay_type}" if stay_type else ""}
-         ),
+        ),
         pre_reservation_count AS(
             SELECT r.room_seq, COUNT(*) AS reservation_count FROM available_room_info ari
             JOIN public.reservations r ON ari.room_seq = r.room_seq
@@ -185,7 +185,7 @@ async def add_reservation_repository(
     async with postgres_client.session() as session:
         try:
             async with session.begin():
-                created_at = get_kst_time_now()
+                request_timestamp = get_kst_time_now()
                 stmt = dialects.postgresql.insert(ReservationOrm).values(
                     user_seq=user_seq,
                     stay_seq=stay_seq,
@@ -195,12 +195,23 @@ async def add_reservation_repository(
                     adult_guest_count=adult_guest_count,
                     child_guest_count=child_guest_count,
                     reservation_status='pending',
-                    booking_date=created_at,
+                    booking_date=request_timestamp,
                     payment_status='unpaid',
                     special_requests=special_requests,
-                    created_at=created_at,
-                    updated_at=created_at,
+                    created_at=request_timestamp,
+                    updated_at=request_timestamp,
                     payment_price=payment_price
+                ).on_conflict_do_update(
+                    index_elements=[
+                        "stay_seq",
+                        "room_seq",
+                        "user_seq",
+                        "check_in_date",
+                        "check_out_date",
+                        "adult_guest_count",
+                        "child_guest_count"
+                    ],
+                    set_={"booking_date": request_timestamp}
                 )
                 await session.execute(stmt)
                 return True
