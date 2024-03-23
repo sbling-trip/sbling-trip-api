@@ -190,8 +190,8 @@ async def add_reservation_repository(
                     user_seq=user_seq,
                     stay_seq=stay_seq,
                     room_seq=room_seq,
-                    check_in_date=check_in_date,
-                    check_out_date=check_out_date,
+                    check_in_date=check_in_date.replace(tzinfo=None),
+                    check_out_date=check_out_date.replace(tzinfo=None),
                     adult_guest_count=adult_guest_count,
                     child_guest_count=child_guest_count,
                     reservation_status='pending',
@@ -240,7 +240,7 @@ async def is_reservation_available(
         try:
             stmt = text(dedent(f"""
             WITH available_room_info AS (
-                 SELECT room_seq
+                 SELECT room_seq, room_available_count
                  FROM room_info
                  WHERE 
                  min_people <= {adult_guest_count + child_guest_count}
@@ -253,7 +253,7 @@ async def is_reservation_available(
                 WHERE ((r.check_in_date >= '{check_in_date}' AND r.check_in_date < '{check_out_date}') OR
                       (r.check_out_date > '{check_in_date}' AND r.check_out_date <= '{check_out_date}'))
                       AND r.reservation_status != 'cancelled'
-                WHERE r.room_seq = {room_seq}
+                      AND r.room_seq = {room_seq}
                 GROUP BY r.room_seq
             ),
             available_room_data AS (
@@ -276,15 +276,18 @@ async def update_reservation_payment(
     async with postgres_client.session() as session:
         try:
             async with session.begin():
-                stmt = dialects.postgresql.insert(ReservationOrm).values(
-                    reservation_seq=reservation_seq,
-                ).on_conflict_do_update(
-                    index_elements=['reservation_seq'],
-                    set_={'reservation_status': 'confirmed',
-                          'payment_status': 'paid',
-                          'updated_at': get_kst_time_now()}
+                update_reservation = text(
+                    dedent(
+                        f"""
+                            UPDATE reservations
+                            SET reservation_status = 'confirmed',
+                                payment_status = 'paid',
+                                updated_at = '{get_kst_time_now()}'
+                            WHERE reservation_seq = {reservation_seq}
+                        """
+                    )
                 )
-                await session.execute(stmt)
+                await session.execute(update_reservation)
                 return True
         except Exception as e:
             raise update_reservation_exception(str(e))

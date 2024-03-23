@@ -37,7 +37,11 @@ async def lifespan(app: FastAPI):
         yield
 
 
-app = FastAPI(lifespan=lifespan)
+# 운영환경인경우 API 스펙문서에 접근하지 못하도록 설정
+if IS_PROD:
+    app = FastAPI(lifespan=lifespan, openapi_url=None, docs_url=None, redoc_url=None)
+else:
+    app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
