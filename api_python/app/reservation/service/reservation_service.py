@@ -62,10 +62,13 @@ async def add_reservation_service(
         special_requests: str,
         payment_price: int
 ) -> bool:
+    print(f"add_reservation_service: {user_seq}, {stay_seq}, {room_seq}, {check_in_date}, {check_out_date},"
+          f" {adult_guest_count}, {child_guest_count}, {special_requests}, {payment_price}")
     validate_stay_room_seq = await is_validate_stay_room_seq(
         stay_seq=stay_seq,
         room_seq=room_seq
     )
+    print(f"validate_stay_room_seq: {validate_stay_room_seq}")
     if not validate_stay_room_seq:
         raise get_validate_stay_room_seq_exception("올바르지 않은 숙소 또는 방입니다. staySeq와 roomSeq를 확인해주세요.")
 
@@ -76,6 +79,7 @@ async def add_reservation_service(
         adult_guest_count=adult_guest_count,
         child_guest_count=child_guest_count
     )
+    print(f"reservation_available: {reservation_available}")
 
     if not reservation_available:
         raise get_validate_room_exception()
@@ -91,6 +95,7 @@ async def add_reservation_service(
         special_requests=special_requests,
         payment_price=payment_price
     )
+    print(f"reservation_seq: {reservation_seq}")
 
     await point_payment_service(
         user_seq=user_seq,
@@ -102,6 +107,7 @@ async def add_reservation_service(
     except Exception as e:
         # TODO: 에러 로그 저장, 추후 DB 자체에서 업데이트 처리
         print(f"Update reservation payment failed after retries: {str(e)}")
+    print("point_payment_service success")
     return True
 
 

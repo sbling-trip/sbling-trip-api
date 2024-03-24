@@ -201,9 +201,6 @@ async def add_reservation_repository(
                     created_at=request_timestamp,
                     updated_at=request_timestamp,
                     payment_price=payment_price
-                ).on_conflict_do_update(
-                    index_elements=["reservation_seq"],
-                    set_={"booking_date": request_timestamp}
                 ).returning(ReservationOrm.reservation_seq)
                 result = await session.execute(stmt)
                 reservation_seq = result.fetchone()[0]

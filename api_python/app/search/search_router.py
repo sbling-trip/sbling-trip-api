@@ -24,7 +24,7 @@ search_router = APIRouter(
     tags=["검색"],
 )
 async def get_reservation_stay(
-        user_seq: Annotated[int, user_seq_dependency_optional if IS_LOCAL else user_seq_dependency],
+        user_seq: Annotated[int, user_seq_dependency_optional],
         check_in_date: Annotated[date, Query(alias="checkInDate", description="체크인 날짜")],
         check_out_date: Annotated[date, Query(alias="checkOutDate", description="체크 아웃 날짜")],
         adult_guest_count: Annotated[int, Query(alias="adultGuestCount", description="성인 수")],
