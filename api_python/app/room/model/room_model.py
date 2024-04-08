@@ -93,6 +93,8 @@ class UserAvailableRoomModel(BaseModel):
     toilet_option: str
     room_option: str
     special_room_option: str
+    min_people: int
+    max_people: int
     adult_guest_count: int
     child_guest_count: int
 
@@ -113,6 +115,8 @@ class UserResponseAvailableRoomModel(BaseModel):
     toilet_option: list[str]
     room_option: list[str]
     special_room_option: list[str]
+    min_people: int
+    max_people: int
     adult_guest_count: int
     child_guest_count: int
 
@@ -155,6 +159,8 @@ def convert_available_room_model_to_response(room_model: UserAvailableRoomModel)
         room_option=str_to_list(room_model.room_option),
         special_room_option=str_to_list(room_model.special_room_option),
         adult_guest_count=room_model.adult_guest_count,
-        child_guest_count=room_model.child_guest_count
+        child_guest_count=room_model.child_guest_count,
+        min_people=room_model.min_people,
+        max_people=room_model.max_people
     )
 

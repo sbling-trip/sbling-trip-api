@@ -1,8 +1,6 @@
 from jose import jwt, JWTError
 from starlette.exceptions import HTTPException
-from starlette.requests import Request
 
-from api_python.app.common.exceptions import credentials_exception
 from api_python.resources.credentials import SECRET_KEY, ALGORITHM
 
 

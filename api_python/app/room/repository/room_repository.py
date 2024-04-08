@@ -78,7 +78,9 @@ def reservation_room_sql_generator(
             room_option,
             special_room_option,
             {adult_guest_count} AS adult_guest_count,
-            {child_guest_count} AS child_guest_count
+            {child_guest_count} AS child_guest_count,
+            ri.min_people,
+            ri.max_people
         FROM
             available_room_info ri
         JOIN

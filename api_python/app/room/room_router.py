@@ -4,9 +4,8 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from api_python.app.common.api_response import ApiResponse
-from api_python.app.room.model.room_model import UserResponseRoomModel, UserResponseAvailableRoomModel
-from api_python.app.room.service.room_service import get_room_info_by_stay_seq, \
-    get_available_room_info_by_stay_seq_service
+from api_python.app.room.model.room_model import UserResponseRoomModel
+from api_python.app.room.service.room_service import get_room_info_by_stay_seq
 
 room_router = APIRouter(
     prefix="/room",

@@ -56,7 +56,6 @@ async def get_total_review_count_by_stay_seq(stay_seq: int) -> int:
             raise get_review_exception(str(e))
 
 
-
 async def add_review(
         stay_seq: int,
         user_seq: int,
